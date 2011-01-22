@@ -24,11 +24,12 @@ class PolyrexCalendar
   def to_webpage()
     
     # transform the xml to html
+    lib = File.join(File.dirname(__FILE__), '..', 'lib')
 
     doc = Nokogiri::XML(@xml)
-    xslt  = Nokogiri::XSLT(open('calendar.xsl','r'))
+    xslt  = Nokogiri::XSLT(File.open(lib + '/calendar.xsl','r').read)
     html =  xslt.transform(doc).to_xml
-    css = File.open('layout.css','r').read
+    css = File.open(lib + '/layout.css','r').read
     
     {'calendar.html' => html, 'layout.css' => css}
   end

@@ -2,8 +2,7 @@
 
 # file: polyrex-calendar.rb
 
-#require 'polyrex'
-require '/home/james/learning/ruby/polyrex'
+require 'polyrex'
 require 'date'
 require 'nokogiri'
 
@@ -23,14 +22,14 @@ class PolyrexCalendar
   end
 
   def to_webpage()
+    
     # transform the xml to html
 
     doc = Nokogiri::XML(@xml)
     xslt  = Nokogiri::XSLT(open('calendar.xsl','r'))
     html =  xslt.transform(doc).to_xml
     css = File.open('layout.css','r').read
-
-    # html = ...
+    
     {'calendar.html' => html, 'layout.css' => css}
   end
 
