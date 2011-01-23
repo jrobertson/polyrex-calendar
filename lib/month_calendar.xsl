@@ -46,7 +46,11 @@
 
 <xsl:template match="day/summary">
   <td>
-    <div><xsl:value-of select="xday"/></div>
+    <div>
+      <xsl:if test="name!=''">
+        <xsl:value-of select="xday"/>
+      </xsl:if>
+    </div>
     <xsl:choose>
       <xsl:when test="contains(event,'oliday')">
       <div><xsl:value-of select="event"/></div>

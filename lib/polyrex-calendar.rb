@@ -78,6 +78,10 @@ class PolyrexCalendar
         weeks = month.each_slice(7).to_a
       end
 
+      if weeks[-1].length < 7 then
+        weeks[-1] = (weeks[-1] + [nil] * 6 ).slice(0,7)
+      end
+
       weeks
     end
 
@@ -112,8 +116,9 @@ class PolyrexCalendar
                   date: x.strftime("%Y-%b-%d")}
               else
                 #if blank find the nearest date in the week and calculate this date
-                # check right and if nothing then it'sat the end of the month
-                h = {}
+                # check right and if nothing then it's at the end of the month
+                x = week[-1] ? (week[-1] - (7-(k+1))) : week[0] + k
+                h = {wday: x.wday.to_s, xday: x.day.to_s, date: x.strftime("%Y-%b-%d")}
               end
               create.day(h)
             end
