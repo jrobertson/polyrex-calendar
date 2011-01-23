@@ -8,9 +8,16 @@ require 'nokogiri'
 
 class PolyrexCalendar
 
+  attr_accessor :xsl, :css, :polyrex, :month_xsl, :month_css
+  
   def initialize(year=nil)
     @year = year ? year : Time.now.year
     generate_calendar
+    lib = File.dirname(__FILE__)
+    @xsl = File.open(lib + '/calendar.xsl','r').read
+    @css = File.open(lib + '/layout.css','r').read
+    @month_xsl = File.open(lib + '/month_calendar.xsl','r').read
+    @month_css = File.open(lib + '/month_layout.css','r').read
   end
 
   def to_a()
@@ -18,20 +25,33 @@ class PolyrexCalendar
   end
 
   def to_xml()
-    @xml
+    @polyrex.to_xml pretty: true
   end
 
-  def to_webpage()
-    
-    # transform the xml to html
-    lib = File.dirname(__FILE__)
+  def to_webpage()    
+    html = generate_webpage(@polyrex.to_xml, @xsl)    
+    {'calendar.html' => html, 'layout.css' => @css}
+  end  
 
-    doc = Nokogiri::XML(@xml)
-    xslt  = Nokogiri::XSLT(File.open(lib + '/calendar.xsl','r').read)
-    html =  xslt.transform(doc).to_xml
-    css = File.open(lib + '/layout.css','r').read
-    
-    {'calendar.html' => html, 'layout.css' => css}
+  def import_events(dynarex)
+    dynarex.flat_records.each do |event|
+      m,w,i = @day[Date.parse(event[:date])]
+      @polyrex.records[m].week[w].day[i].event = event[:title]
+    end
+    self
+  end
+
+  def month(m)
+    monthx = @polyrex.records[m-1]
+    def monthx.to_webpage()
+      lib = File.dirname(__FILE__)
+      month_xsl = File.open(lib + '/month_calendar.xsl','r').read
+      month_css = File.open(lib + '/month_layout.css','r').read
+      doc = Nokogiri::XML(self.to_xml);  xslt  = Nokogiri::XSLT(month_xsl)
+      html =  xslt.transform(doc).to_xml    
+      {self.name.downcase[0..2] + '_calendar.html' => html, 'month_layout.css' => month_css}
+    end
+    monthx
   end
 
   private
@@ -54,18 +74,25 @@ class PolyrexCalendar
       weeks
     end
 
+    @day = {}
+    months.each_with_index do |month,m|
+      month.each_with_index do |weeks,w| 
+        weeks.each_with_index{|d,i| @day[d] = [m,w,i]} 
+      end
+    end
+
     @a = months
 
-    calendar = Polyrex.new('calendar[year]/month[no,name]/week[no, rel_no]/day[wday, xday, name, event]')
+    @polyrex = Polyrex.new('calendar[year]/month[no,name,year]/week[no, rel_no]/day[wday, xday, name, event]')
     year_start = months[0][0][-1]
-    calendar.summary.year = year_start.year.to_s
-    old_year_week = year_start.prev_day.cweek
+    @polyrex.summary.year = @year
+    old_year_week = (year_start - 7).cweek
 
     week_i = 0
 
     months.each_with_index do |month,i| 
 
-      calendar.create.month no: (i+1).to_s, name: Date::MONTHNAMES[i+1] do |create|
+      @polyrex.create.month no: (i+1).to_s, name: Date::MONTHNAMES[i+1], year: @year do |create|
         month.each_with_index do |week,j|
 
           week_s = (week_i == 0 ? old_year_week : week_i).to_s
@@ -85,7 +112,15 @@ class PolyrexCalendar
       end
     end
 
-    @xml = calendar.to_xml pretty: true
+  end
+
+  def generate_webpage(xml, xsl)
+    
+    # transform the xml to html
+    doc = Nokogiri::XML(xml)
+    xslt  = Nokogiri::XSLT(xsl)
+    html =  xslt.transform(doc).to_xml    
+    html
 
   end
 end

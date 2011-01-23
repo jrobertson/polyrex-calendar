@@ -8,6 +8,8 @@ require 'nokogiri'
 
 class PolyrexCalendar
 
+  attr_accessor :xsl
+  
   def initialize(year=nil)
     @year = year ? year : Time.now.year
     generate_calendar
@@ -24,7 +26,7 @@ class PolyrexCalendar
   def to_webpage()
     
     # transform the xml to html
-    lib = File.join(File.dirname(__FILE__), '..', 'lib')
+    lib = File.dirname(__FILE__)
 
     doc = Nokogiri::XML(@xml)
     xslt  = Nokogiri::XSLT(File.open(lib + '/calendar.xsl','r').read)
@@ -32,7 +34,7 @@ class PolyrexCalendar
     css = File.open(lib + '/layout.css','r').read
     
     {'calendar.html' => html, 'layout.css' => css}
-  end
+  end  
 
   private
 
