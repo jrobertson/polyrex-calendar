@@ -18,6 +18,18 @@ class PolyrexCalendar
     @css = File.open(lib + '/layout.css','r').read
     @month_xsl = File.open(lib + '/month_calendar.xsl','r').read
     @month_css = File.open(lib + '/month_layout.css','r').read
+
+    PolyrexObjects::Month.class_eval {
+      def to_webpage()
+        lib = File.dirname(__FILE__)
+        month_xsl = File.open(lib + '/month_calendar.xsl','r').read
+        month_css = File.open(lib + '/month_layout.css','r').read
+        doc = Nokogiri::XML(self.to_xml);  xslt  = Nokogiri::XSLT(month_xsl)
+        html =  xslt.transform(doc).to_xml    
+        {self.name.downcase[0..2] + '_calendar.html' => html, 'month_layout.css' => month_css}
+      end
+    }
+
   end
 
   def to_a()
@@ -42,16 +54,11 @@ class PolyrexCalendar
   end
 
   def month(m)
-    monthx = @polyrex.records[m-1]
-    def monthx.to_webpage()
-      lib = File.dirname(__FILE__)
-      month_xsl = File.open(lib + '/month_calendar.xsl','r').read
-      month_css = File.open(lib + '/month_layout.css','r').read
-      doc = Nokogiri::XML(self.to_xml);  xslt  = Nokogiri::XSLT(month_xsl)
-      html =  xslt.transform(doc).to_xml    
-      {self.name.downcase[0..2] + '_calendar.html' => html, 'month_layout.css' => month_css}
-    end
-    monthx
+    @polyrex.records[m-1]
+  end
+
+  def months
+    @polyrex.records
   end
 
   private
@@ -83,7 +90,7 @@ class PolyrexCalendar
 
     @a = months
 
-    @polyrex = Polyrex.new('calendar[year]/month[no,name,year]/week[no, rel_no]/day[wday, xday, name, event]')
+    @polyrex = Polyrex.new('calendar[year]/month[no,name,year]/week[no, rel_no]/day[wday, xday, name, event, date]')
     year_start = months[0][0][-1]
     @polyrex.summary.year = @year
     old_year_week = (year_start - 7).cweek
@@ -101,8 +108,11 @@ class PolyrexCalendar
 
               if x then
                 week_i += 1 if x.wday == 6
-                h = {wday: x.wday.to_s, xday: x.day.to_s, name: Date::DAYNAMES[k]}
+                h = {wday: x.wday.to_s, xday: x.day.to_s, name: Date::DAYNAMES[k], \
+                  date: x.strftime("%Y-%b-%d")}
               else
+                #if blank find the nearest date in the week and calculate this date
+                # check right and if nothing then it'sat the end of the month
                 h = {}
               end
               create.day(h)
