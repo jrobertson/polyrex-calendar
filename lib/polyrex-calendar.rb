@@ -11,7 +11,7 @@ class PolyrexCalendar
   attr_accessor :xsl, :css, :polyrex, :month_xsl, :month_css
   
   def initialize(year=nil)
-    @year = year ? year : Time.now.year
+    @year = year ? year.to_s : Time.now.year.to_s
     generate_calendar
     lib = File.dirname(__FILE__)
     @xsl = File.open(lib + '/calendar.xsl','r').read
@@ -65,11 +65,10 @@ class PolyrexCalendar
 
   def generate_calendar()
 
-    d = Date.parse(@year.to_s + '-Jan-01')
-    a = []
-    (a << d; d += 1) while d.year == Time.now.year
+    a = (Date.parse(@year + '-01-01')...Date.parse(@year.succ + '-01-01')).to_a
 
     months = a.group_by(&:month).map do |key, month|
+
       i = month.index(month.detect{|x| x.wday == 0})
       unless i == 0 then
         weeks = [month.slice!(0,i)] + month.each_slice(7).to_a
@@ -78,9 +77,7 @@ class PolyrexCalendar
         weeks = month.each_slice(7).to_a
       end
 
-      if weeks[-1].length < 7 then
-        weeks[-1] = (weeks[-1] + [nil] * 6 ).slice(0,7)
-      end
+      weeks[-1] = (weeks[-1] + [nil] * 6 ).slice(0,7) if weeks[-1].length < 7 
 
       weeks
     end
