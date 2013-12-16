@@ -1,0 +1,67 @@
+/* week.css*/
+
+#wrap h1 {
+  background-color: transparent; 
+  font-size: 1.4em;
+  margin: 0.3em 0.3em; 
+  padding: 0.4em 0.2em;
+}
+
+#wrap ul { 
+  background-color: transparent;
+  list-style-type: none;
+  padding: 0.1em 1em;
+  margin: 0.3em 0.2em;
+}
+
+  #wrap ul li { 
+    background-color: transparent;
+    padding: 0.2em 0.2em;
+    margin: 0.2em 0.2em;
+  }
+
+    #wrap ul li h2 { 
+      background-color: transparent;
+      font-size: 1.1em;
+      padding: 0.2em 0.3em;
+      margin: 0.1em 0.2em;
+    }
+
+    #wrap ul li ul { 
+      background-color: transparent;
+      padding: 0.2em 0.3em;
+      margin: 0.1em 0.2em 0.2em 0.2em;
+    }
+
+      #wrap ul li ul li{ 
+        background-color: transparent;
+        border-bottom: 1px solid black;
+        font-size: 0.75em;
+        margin: 0.1em 0.1em 0em 0.1em;
+        min-height: 2.0em;
+        padding: 0.1em 0.1em 0em 0.1em;
+      }
+
+        #wrap ul li ul li div{ 
+          background-color: transparent;
+          float: left;
+          width: 7em;
+          padding: 0.1em;
+          margin-left: 0.6em;
+        }
+
+        #wrap div#duration{ 
+          background-color: transparent;
+          float: right;
+          width: 10em;
+          text-align: right;
+        }
+
+
+      #wrap ul li ul li p{ 
+        background-color: transparent;
+        clear: both;
+        font-size: 1.2em;    
+        margin: 1.8em 0.5em 0.3em 0.4em;
+        padding: 0.3em 0.4em;
+      }

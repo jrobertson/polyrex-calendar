@@ -1,0 +1,27 @@
+/* week_layout.css */
+
+body {background-color: transparent }
+
+#wrap {
+  background-color: transparent; 
+  margin: 0 auto;
+  width: 1200px;   
+}
+
+  #wrap div {
+    background-color: transparent;
+    margin: 0.5em 1em;
+    padding: 0.3em 0.6em 0.3em 0.2em;
+    float: left;
+    width: 28em;
+  }
+
+  #wrap div#col1 {
+    background-color: transparent;
+  }
+
+  #wrap div#col2 {
+    background-color: transparent;    
+  }
+
+
