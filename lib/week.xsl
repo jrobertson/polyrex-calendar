@@ -34,12 +34,12 @@
 <xsl:template match='week/records'>
 <div id='col1'>
   <ul>
-    <xsl:apply-templates select="day[summary/wday &lt; '3']"/>
+    <xsl:apply-templates select="day[position() &lt; 5]"/>
   </ul>
 </div>
 <div id='col2'>
   <ul>
-    <xsl:apply-templates select="day[summary/wday &gt;= '3']"/>
+    <xsl:apply-templates select="day[position() &gt;= 5]"/>
   </ul>
 </div>
 </xsl:template>

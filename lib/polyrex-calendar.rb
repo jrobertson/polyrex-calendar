@@ -7,6 +7,12 @@ require 'date'
 require 'nokogiri'
 require 'chronic_duration'
 
+MINUTE = 60
+HOUR = MINUTE * 60
+DAY = HOUR * 24
+WEEK = DAY * 7
+MONTH = DAY * 30
+
 class Numeric
   def ordinal
     ( (10...20).include?(self) ? 'th' : %w{ th st nd rd th th th th th th }[self % 10] )
@@ -20,12 +26,13 @@ class PolyrexCalendar
   def initialize(year=nil, options={})
 
     @id = '1'
-    
+
+    lib = File.dirname(__FILE__)
     opts = {calendar_xsl: lib + '/calendar.xsl'
             }.merge(options)
     @year = year ? year.to_s : Time.now.year.to_s
     generate_calendar
-    lib = File.dirname(__FILE__)
+
 
     @xsl = File.read lib + '/calendar.xsl'
     @css = File.read lib + '/layout.css'
@@ -41,7 +48,11 @@ class PolyrexCalendar
 
         month_xsl = File.read lib + '/month_calendar.xsl'
         month_css = File.read lib + '/month_layout.css'
-        
+
+        File.open('self.xml','w'){|f| f.write self.to_xml pretty: true}
+        File.open('month.xsl','w'){|f| f.write month_xsl }
+        #html = Rexslt.new(month_xsl, self.to_xml).to_xml
+
         xslt  = Nokogiri::XSLT(month_xsl)
         html = xslt.transform(Nokogiri::XML(self.to_xml)).to_s
         {self.name.downcase[0..2] + '_calendar.html' => html, 'month_layout.css' => month_css}
@@ -60,12 +71,17 @@ class PolyrexCalendar
       end
       
       def to_webpage()
+        
         lib = File.dirname(__FILE__)
-
+        
         week_xsl = File.read lib + '/week_calendar.xsl'
         week_layout_css = File.read lib + '/week_layout.css'
         week_css = File.read lib + '/week.css'
-
+        
+        File.open('self.xml','w'){|f| f.write self.to_xml pretty: true}
+        File.open('week.xsl','w'){|f| f.write week_xsl }        
+        #html = Rexslt.new(week_xsl, self.to_xml).to_xml
+        #html = xsltproc 'week_calendar.xsl', self.to_xml
         xslt  = Nokogiri::XSLT(week_xsl)
         html = xslt.transform(Nokogiri::XML(self.to_xml)).to_s
         {'week' + self.no + '_planner.html' => html, 'week_layout.css' => week_layout_css, \
@@ -85,8 +101,9 @@ class PolyrexCalendar
   end
 
   def to_webpage()
-    #html = Rexslt.new(@xsl, @polyrex.to_xml).to_xml   
-    html = generate_webpage(@polyrex.to_xml, @xsl)    
+    # jr2441213 html = Rexslt.new(@xsl, @polyrex.to_xml).to_xml   
+    xslt  = Nokogiri::XSLT(@xsl)
+    html = xslt.transform(Nokogiri::XML(@polyrex.to_xml)).to_s
     {'calendar.html' => html, 'layout.css' => @css}
   end  
 
@@ -122,15 +139,36 @@ class PolyrexCalendar
     polyrex.parse(list)
 
     self.import_events polyrex
+    # for testing only
+    #polyrex
   end
   
   def this_week()
+
     m = DateTime.now.month
-    self.month(m).records.find do |week|
+    thisweek = self.month(m).records.find do |week|
       now = DateTime.now
-      week_no = now.cwday < 7 ? now.cweek - 1: now.cweek 
+      #week_no = now.cwday < 7 ? now.cweek - 1: now.cweek
+      week_no = now.cweek
       week.no == week_no.to_s
     end
+
+    day = (Time.now - DAY * (Time.now.wday - 1)).day
+
+    days_in_week = self.this_month.xpath('records/week/records/.')\
+      .select {|x| x.text('summary/xday').to_i >= day}\
+      .take 7
+
+    doc_week = Rexle.new thisweek.to_xml
+    records = doc_week.root.element 'records'
+    records.insert_before Rexle::Element.new('records')
+
+    records.delete
+
+    week = doc_week.root.element 'records'
+    days_in_week.each {|day| week.add day }
+    PolyrexObjects.new(@schema).to_h['Week'].new doc_week.root
+
   end
 
   def this_month()
@@ -166,13 +204,14 @@ class PolyrexCalendar
 
           start_time = entry.start_time  
 
-          if entry.end_time then
+          if entry.end_time.length > 0 then
+
             end_time = entry.end_time
             duration = ChronicDuration.output(Time.parse(sd + end_time) \
               - Time.parse(sd + start_time))
           else
 
-            if entry.duration then
+            if entry.duration.length > 0 then
               duration = entry.duration
             else
               duration = '10 mins'
@@ -236,22 +275,23 @@ class PolyrexCalendar
     end
 
     @a = months
-    schema = 'calendar[year]/month[no,name,year]/week[no, rel_no, mon, label]/' + \
+    @schema = 'calendar[year]/month[no,name,year]/week[no, rel_no, mon, label]/' + \
         'day[wday, xday, name, event, date, ordinal, overlap]/' + \
         'entry[time_start, time_end, duration, title]'
-    @polyrex = Polyrex.new(schema, id_counter: @id)
+    @polyrex = Polyrex.new(@schema, id_counter: @id)
     year_start = months[0][0][-1]
     @polyrex.summary.year = @year
     old_year_week = (year_start - 7).cweek
 
-    week_i = 0
+    week_i = 1
 
     months.each_with_index do |month,i| 
       month_name = Date::MONTHNAMES[i+1]
       @polyrex.create.month no: (i+1).to_s, name: month_name, year: @year do |create|
         month.each_with_index do |week,j|
 
-          week_s = (week_i == 0 ? old_year_week : week_i).to_s
+          # jr241213 week_s = (week_i == 0 ? old_year_week : week_i).to_s
+          week_s = week_i.to_s
           
           if week[0].nil? then
             label = Date::MONTHNAMES[(i > 0 ? i : 12)] + " - " + month_name
@@ -261,6 +301,7 @@ class PolyrexCalendar
             label = month_name + " - " + Date::MONTHNAMES[(i+2 <= 12 ? i+2 : 1)] 
           end          
           
+
           week_record = {
             rel_no: (j+1).to_s,
             no: week_s, 
@@ -329,6 +370,5 @@ class PolyrexCalendar
     html =  xslt.transform(doc).to_xml    
     html
 
-  end  
-  
+  end
 end
