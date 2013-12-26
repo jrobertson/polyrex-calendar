@@ -1,4 +1,4 @@
-#!/usr/bin/ruby
+#!/usr/bin/env ruby
 
 # file: polyrex-calendar.rb
 
@@ -174,13 +174,20 @@ class PolyrexCalendar
   def this_month()
     self.month(DateTime.now.month)
   end
+
+  def import_bankholidays(dynarex)
+    import_dynarex(dynarex, :bankholiday=)
+  end
   
   private
   
-  def import_dynarex(dynarex)
+  def import_dynarex(dynarex, daytype=:event=)
+
     dynarex.flat_records.each do |event|
-      m,w,i = @day[Date.parse(event[:date])]
-      @polyrex.records[m].week[w].day[i].event = event[:title]
+
+      date = Date.parse(event[:date])
+      m,w,i = @day[date]    
+      @polyrex.records[m].week[w].day[i].method(daytype).call event[:title]
     end
   end
 
@@ -275,8 +282,8 @@ class PolyrexCalendar
     end
 
     @a = months
-    @schema = 'calendar[year]/month[no,name,year]/week[no, rel_no, mon, label]/' + \
-        'day[wday, xday, name, event, date, ordinal, overlap]/' + \
+    @schema = 'calendar[year]/month[no,title,year]/week[no, rel_no, mon, label]/' + \
+        'day[wday, xday, title, event, date, ordinal, overlap, bankholiday]/' + \
         'entry[time_start, time_end, duration, title]'
     @polyrex = Polyrex.new(@schema, id_counter: @id)
     year_start = months[0][0][-1]
@@ -287,7 +294,7 @@ class PolyrexCalendar
 
     months.each_with_index do |month,i| 
       month_name = Date::MONTHNAMES[i+1]
-      @polyrex.create.month no: (i+1).to_s, name: month_name, year: @year do |create|
+      @polyrex.create.month no: (i+1).to_s, title: month_name, year: @year do |create|
         month.each_with_index do |week,j|
 
           # jr241213 week_s = (week_i == 0 ? old_year_week : week_i).to_s
@@ -317,14 +324,14 @@ class PolyrexCalendar
                 x = day
                 week_i += 1 if x.wday == 6
                 h = {wday: x.wday.to_s, xday: x.day.to_s, \
-                  name: Date::DAYNAMES[k], date: x.strftime("%Y-%b-%d"), \
+                  title: Date::DAYNAMES[k], date: x.strftime("%Y-%b-%d"), \
                   ordinal: x.day.to_i.ordinal}
               else
                 #if blank find the nearest date in the week and calculate this date
                 # check right and if nothing then it's at the end of the month
                 x = week[-1] ? (week[-1] - (7-(k+1))) : week[0] + k
                 h = {wday: x.wday.to_s, xday: x.day.to_s, \
-                  name: Date::DAYNAMES[k], date: x.strftime("%Y-%b-%d"), \
+                  title: Date::DAYNAMES[k], date: x.strftime("%Y-%b-%d"), \
                   ordinal: x.day.to_i.ordinal, overlap: 'true'}
               end
 

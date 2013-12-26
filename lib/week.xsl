@@ -52,7 +52,7 @@
 </xsl:template>
 
 <xsl:template match='day/summary'>
-    <h2><xsl:value-of select="name"/> <xsl:text>  </xsl:text><xsl:value-of select="xday"/><xsl:value-of select="ordinal"/></h2>
+    <h2><xsl:value-of select="title"/> <xsl:text>  </xsl:text><xsl:value-of select="xday"/><xsl:value-of select="ordinal"/></h2>
 </xsl:template>
 
 <xsl:template match='day/records'>
