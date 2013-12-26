@@ -23,16 +23,23 @@ class PolyrexCalendar
 
   attr_accessor :xsl, :css, :polyrex, :month_xsl, :month_css
   
-  def initialize(year=nil, options={})
+  def initialize(calendar_file=nil, options={})
 
     @id = '1'
-
+    if calendar_file then
+      @polyrex = Polyrex.new calendar_file
+      @id = @polyrex.id_counter
+    else
+      @id = '1'
+    end
+    
     lib = File.dirname(__FILE__)
     opts = {calendar_xsl: lib + '/calendar.xsl'
             }.merge(options)
+    
+    year = opts[:year]
     @year = year ? year.to_s : Time.now.year.to_s
     generate_calendar
-
 
     @xsl = File.read lib + '/calendar.xsl'
     @css = File.read lib + '/layout.css'
@@ -47,15 +54,23 @@ class PolyrexCalendar
         lib = File.dirname(__FILE__)
 
         month_xsl = File.read lib + '/month_calendar.xsl'
-        month_css = File.read lib + '/month_layout.css'
+        month_layout_css = File.read lib + '/month_layout.css'
+        month_css = File.read lib + '/month.css'
 
         File.open('self.xml','w'){|f| f.write self.to_xml pretty: true}
         File.open('month.xsl','w'){|f| f.write month_xsl }
         #html = Rexslt.new(month_xsl, self.to_xml).to_xml
 
+        # add a css selector for the current day
+        date = Time.now.strftime("%Y-%b-%d")
+        doc = Rexle.new self.to_xml
+        e = doc.root.element("records/week/records/day/summary[date='#{date}']")
+        e.add Rexle::Element.new('css_style').add_text('selected')
+
         xslt  = Nokogiri::XSLT(month_xsl)
-        html = xslt.transform(Nokogiri::XML(self.to_xml)).to_s
-        {self.title.downcase[0..2] + '_calendar.html' => html, 'month_layout.css' => month_css}
+        html = xslt.transform(Nokogiri::XML(doc.xml)).to_s
+        {self.title.downcase[0..2] + '_calendar.html' => html, 
+          'month_layout.css' => month_layout_css, 'month.css' => month_css}
 
       end      
       
@@ -82,8 +97,16 @@ class PolyrexCalendar
         File.open('week.xsl','w'){|f| f.write week_xsl }        
         #html = Rexslt.new(week_xsl, self.to_xml).to_xml
         #html = xsltproc 'week_calendar.xsl', self.to_xml
+        
+        # add a css selector for the current day
+        date = Time.now.strftime("%Y-%b-%d")
+        doc = Rexle.new self.to_xml
+        e = doc.root.element("records/day/summary[date='#{date}']")
+
+        e.add Rexle::Element.new('css_style').add_text('selected')        
         xslt  = Nokogiri::XSLT(week_xsl)
-        html = xslt.transform(Nokogiri::XML(self.to_xml)).to_s
+        html = xslt.transform(Nokogiri::XML(doc.xml)).to_s
+        
         {'week' + self.no + '_planner.html' => html, 'week_layout.css' => week_layout_css, \
          'week.css' => week_css}
       end
@@ -141,6 +164,10 @@ class PolyrexCalendar
     self.import_events polyrex
     # for testing only
     #polyrex
+  end
+
+  def save(filename='polyrex.xml')
+    @polyrex.save filenameS
   end
   
   def this_week()

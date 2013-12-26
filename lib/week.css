@@ -7,18 +7,23 @@
   padding: 0.4em 0.2em;
 }
 
-#wrap ul { 
-  background-color: transparent;
+#wrap div ul { 
+  background-color: #ee9;
   list-style-type: none;
   padding: 0.1em 1em;
   margin: 0.3em 0.2em;
 }
 
-  #wrap ul li { 
-    background-color: transparent;
+  #wrap div ul li { 
+    background-color: #492;
     padding: 0.2em 0.2em;
     margin: 0.2em 0.2em;
   }
+
+  #wrap div ul li.selected { 
+    background-color: rgba(200,200,150,1);
+  }
+
 
     #wrap ul li h2 { 
       background-color: transparent;

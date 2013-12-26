@@ -45,10 +45,13 @@
 </xsl:template>
 
 <xsl:template match='day'>
-  <li>
+  <xsl:element name="li">
+    <xsl:if test="summary/css_style">
+      <xsl:attribute name="class"><xsl:value-of select="summary/css_style"/></xsl:attribute>
+    </xsl:if>
     <xsl:apply-templates select='summary'/>
     <xsl:apply-templates select='records'/>
-  </li>
+  </xsl:element>
 </xsl:template>
 
 <xsl:template match='day/summary'>
