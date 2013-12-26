@@ -55,7 +55,7 @@ class PolyrexCalendar
 
         xslt  = Nokogiri::XSLT(month_xsl)
         html = xslt.transform(Nokogiri::XML(self.to_xml)).to_s
-        {self.name.downcase[0..2] + '_calendar.html' => html, 'month_layout.css' => month_css}
+        {self.title.downcase[0..2] + '_calendar.html' => html, 'month_layout.css' => month_css}
 
       end      
       
