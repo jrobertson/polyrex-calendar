@@ -22,24 +22,34 @@ end
 class PolyrexCalendar
 
   attr_accessor :xsl, :css, :polyrex, :month_xsl, :month_css
-  
+  attr_reader :day
+
   def initialize(calendar_file=nil, options={})
 
-    @id = '1'
-    if calendar_file then
-      @polyrex = Polyrex.new calendar_file
-      @id = @polyrex.id_counter
-    else
-      @id = '1'
-    end
-    
     lib = File.dirname(__FILE__)
     opts = {calendar_xsl: lib + '/calendar.xsl'
             }.merge(options)
-    
     year = opts[:year]
     @year = year ? year.to_s : Time.now.year.to_s
-    generate_calendar
+
+
+    if calendar_file then
+      @polyrex = Polyrex.new calendar_file
+      @id = @polyrex.id_counter
+
+      @day = {}
+      @polyrex.records.each_with_index do |month,m|
+        month.records.each_with_index do |weeks,w| 
+          weeks.records.each_with_index do|d,i| 
+            @day[Date.parse(d.date)] = [m,w,i]
+          end 
+        end
+      end
+
+    else
+      @id = '1'
+      generate_calendar
+    end  
 
     @xsl = File.read lib + '/calendar.xsl'
     @css = File.read lib + '/layout.css'
@@ -167,7 +177,7 @@ class PolyrexCalendar
   end
 
   def save(filename='polyrex.xml')
-    @polyrex.save filenameS
+    @polyrex.save filename
   end
   
   def this_week()
