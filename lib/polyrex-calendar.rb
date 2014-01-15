@@ -13,25 +13,41 @@ DAY = HOUR * 24
 WEEK = DAY * 7
 MONTH = DAY * 30
 
-class Numeric
-  def ordinal
-    ( (10...20).include?(self) ? 'th' : %w{ th st nd rd th th th th th th }[self % 10] )
+
+module LIBRARY
+
+  def fetch_file(filename)
+    #lib = File.dirname(__FILE__)
+    #File.read filename
+    lib = 'http://rorbuilder.info/r/ruby/polyrex-calendar'
+    open(File.join(lib, filename), 
+      'UserAgent' => 'PolyrexCalendar'){|x| x.read }
   end
-end
+
+  def generate_webpage(xml, xsl)
+    
+    # transform the xml to html
+    doc = Nokogiri::XML(xml)
+    xslt  = Nokogiri::XSLT(xsl)
+    xslt.transform(doc).to_s   
+  end
+end 
 
 class PolyrexCalendar
+  include LIBRARY
 
   attr_accessor :xsl, :css, :polyrex, :month_xsl, :month_css
   attr_reader :day
-
+  
   def initialize(calendar_file=nil, options={})
 
-    lib = File.dirname(__FILE__)
-    opts = {calendar_xsl: lib + '/calendar.xsl'
-            }.merge(options)
-    year = opts[:year]
-    @year = year ? year.to_s : Time.now.year.to_s
+    opts = {year: Time.now.year.to_s}.merge(options)
+    @year = opts[:year]
 
+    @schema = 'calendar[year]/month[no,title,year]/' + \
+        'week[no, rel_no, mon, label]/day[wday, xday, title, event, date, ' + \
+        'ordinal, overlap, bankholiday]/' + \
+        'entry[time_start, time_end, duration, title]'
 
     if calendar_file then
       @polyrex = Polyrex.new calendar_file
@@ -49,23 +65,52 @@ class PolyrexCalendar
     else
       @id = '1'
       generate_calendar
-    end  
+    end
 
-    @xsl = File.read lib + '/calendar.xsl'
-    @css = File.read lib + '/layout.css'
-    
+    @xsl = fetch_file 'calendar.xsl'
+    @css = fetch_file 'layout.css'
+
+    Polyrex.class_eval do
+      include LIBRARY
+
+      attr_accessor :xslt, :css_layout, :css_style, :filename
+
+      def inspect()
+        "#<Polyrex:%s" % __id__
+      end
+
+      def to_webpage()
+
+        year_xsl        = fetch_file self.xslt
+        year_layout_css = fetch_file self.css_layout
+        year_css        = fetch_file self.css_style
+
+        File.open('self.xml','w'){|f| f.write (self.to_xml pretty: true)}
+        File.open(self.xslt,'w'){|f| f.write year_xsl }
+        #html = Rexslt.new(month_xsl, self.to_xml).to_xml
+
+        html = generate_webpage self.to_xml, year_xsl
+        {self.filename => html, 
+          self.css_layout => year_layout_css, self.css_style => year_css}
+
+      end      
+         
+    end
+
     PolyrexObjects::Month.class_eval do
+      include LIBRARY
+
+      attr_accessor :xslt, :css_layout, :css_style
 
       def inspect()
         "#<PolyrexObjects::Month:%s" % __id__
       end
 
       def to_webpage()
-        lib = File.dirname(__FILE__)
 
-        month_xsl = File.read lib + '/month_calendar.xsl'
-        month_layout_css = File.read lib + '/month_layout.css'
-        month_css = File.read lib + '/month.css'
+        month_xsl        = fetch_file self.xslt
+        month_layout_css = fetch_file self.css_layout
+        month_css        = fetch_file self.css_style
 
         File.open('self.xml','w'){|f| f.write self.to_xml pretty: true}
         File.open('month.xsl','w'){|f| f.write month_xsl }
@@ -77,11 +122,9 @@ class PolyrexCalendar
         e = doc.root.element("records/week/records/day/summary[date='#{date}']")
         e.add Rexle::Element.new('css_style').add_text('selected')
 
-        xslt  = Nokogiri::XSLT(month_xsl)
-        html = xslt.transform(Nokogiri::XML(doc.xml)).to_s
+        html = generate_webpage doc.xml, month_xsl
         {self.title.downcase[0..2] + '_calendar.html' => html, 
-          'month_layout.css' => month_layout_css, 'month.css' => month_css}
-
+          self.css_layout => month_layout_css, self.css_style => month_css}
       end      
       
       def wk(n)
@@ -90,33 +133,31 @@ class PolyrexCalendar
     end
     
     PolyrexObjects::Week.class_eval do
+      include LIBRARY
 
       def inspect()
         "#<PolyrexObjects::Week:%s" % __id__
       end
       
       def to_webpage()
-        
-        lib = File.dirname(__FILE__)
-        
-        week_xsl = File.read lib + '/week_calendar.xsl'
-        week_layout_css = File.read lib + '/week_layout.css'
-        week_css = File.read lib + '/week.css'
-        
+
+        week_xsl        = fetch_file 'week_calendar.xsl'
+        week_layout_css = fetch_file 'week_layout.css'
+        week_css        = fetch_file 'week.css'
+
         File.open('self.xml','w'){|f| f.write self.to_xml pretty: true}
         File.open('week.xsl','w'){|f| f.write week_xsl }        
         #html = Rexslt.new(week_xsl, self.to_xml).to_xml
         #html = xsltproc 'week_calendar.xsl', self.to_xml
-        
+
         # add a css selector for the current day
         date = Time.now.strftime("%Y-%b-%d")
         doc = Rexle.new self.to_xml
         e = doc.root.element("records/day/summary[date='#{date}']")
 
-        e.add Rexle::Element.new('css_style').add_text('selected')        
-        xslt  = Nokogiri::XSLT(week_xsl)
-        html = xslt.transform(Nokogiri::XML(doc.xml)).to_s
-        
+        e.add Rexle::Element.new('css_style').add_text('selected')
+
+        html = generate_webpage doc.xml, week_xsl
         {'week' + self.no + '_planner.html' => html, 'week_layout.css' => week_layout_css, \
          'week.css' => week_css}
       end
@@ -133,13 +174,6 @@ class PolyrexCalendar
     @polyrex.to_xml pretty: true
   end
 
-  def to_webpage()
-    # jr2441213 html = Rexslt.new(@xsl, @polyrex.to_xml).to_xml   
-    xslt  = Nokogiri::XSLT(@xsl)
-    html = xslt.transform(Nokogiri::XML(@polyrex.to_xml)).to_s
-    {'calendar.html' => html, 'layout.css' => @css}
-  end  
-
   def import_events(objx)
     @id = @polyrex.id_counter
     method('import_'.+(objx.class.to_s.downcase).to_sym).call(objx)
@@ -152,8 +186,91 @@ class PolyrexCalendar
      %Q(=> #<PolyrexCalendar:#{self.object_id} @id="#{@id}", @year="#{@year}">)
   end
 
-  def month(m)
-    @polyrex.records[m-1]
+  def kitchen_planner()
+
+    px = Polyrex.new(@schema, id_counter: @id)
+    px.summary.year = @year
+    (1..12).each {|n| px.add self.month(n, strict: true) }
+
+    px.xslt = 'kplanner.xsl'
+    px.css_layout = 'monthday_layout.css'
+    px.css_style = 'monthday.css'
+    px.filename = summary.year.to_s + '-kitchen-planner.html'
+
+    px
+    
+  end
+
+  def year_planner()
+
+    px = Polyrex.new(@schema, id_counter: @id)
+    px.summary.year = @year
+    (1..12).each {|n| px.add self.month(n, strict: true) }
+
+    px.xslt = 'calendar.xsl'
+    px.css_layout = 'layout.css'
+    px.css_style = 'year.css'
+    px.filename = px.summary.year.to_s + '-planner.html'
+
+    px
+    
+  end
+
+  def month(m, strict: false)
+
+    cal_month = @polyrex.records[m-1]
+
+    if strict == true then
+
+      days_in_month = cal_month.xpath('records/week/records/.')\
+        .select {|x| Date.parse(x.text('summary/date')).month == m}
+
+      doc_month = Rexle.new cal_month.to_xml
+      records = doc_month.root.element 'records'
+      records.insert_before Rexle::Element.new('records')
+
+      records.delete
+
+      h = PolyrexObjects.new(@schema).to_h
+      pxmonth = h['Month'].new doc_month.root
+
+      a = days_in_month
+      i = a[0].text('summary/wday').to_i
+
+      a2 = if i > 1 then
+        Array.new(i - 1) + a
+      elsif i < 1 then
+        Array.new(6) + a
+      else
+        a
+      end
+
+      a2.each_slice(7) do |days_in_week|
+
+        pxweek = h['Week'].new Rexle.new('<week><summary/><records/></week>').root
+
+        days_in_week.each do |day|
+
+          day = Rexle.new("<day><summary/><records/></day>") unless day
+          pxweek.add h['Day'].new(day.root)
+        end
+
+        pxmonth.add pxweek
+      end
+
+      pxmonth.xslt = 'monthday_calendar.xsl'
+      pxmonth.css_layout = 'monthday_layout.css'
+      pxmonth.css_style = 'monthday.css'
+      pxmonth
+
+    else
+      cal_month.xslt = 'month_calendar.xsl'
+      cal_month.css_layout = 'month_layout.css'
+      cal_month.css_style = 'month.css'
+
+      cal_month
+    end
+
   end
 
   def months
@@ -215,6 +332,22 @@ class PolyrexCalendar
   def import_bankholidays(dynarex)
     import_dynarex(dynarex, :bankholiday=)
   end
+
+  def import_recurring_events(dynarex)
+
+    title = dynarex.summary[:event_title]
+    cc = ChronicCron.new dynarex.summary[:description].split(/,/,2).first
+    time_start= "%s:%02d" % cc.to_time.to_a.values_at(2,1)
+
+    dynarex.flat_records.each do |event|
+
+      dt = DateTime.parse(event[:date])
+      m,w,i = @day[dt.to_date]      
+      record = {title: title, time_start: time_start}
+
+      @polyrex.records[m].week[w].day[i].create.entry record
+    end
+  end
   
   private
   
@@ -222,8 +355,8 @@ class PolyrexCalendar
 
     dynarex.flat_records.each do |event|
 
-      date = Date.parse(event[:date])
-      m,w,i = @day[date]    
+      dt = DateTime.parse(event[:date])
+      m,w,i = @day[dt.to_date]      
       @polyrex.records[m].week[w].day[i].method(daytype).call event[:title]
     end
   end
@@ -319,9 +452,7 @@ class PolyrexCalendar
     end
 
     @a = months
-    @schema = 'calendar[year]/month[no,title,year]/week[no, rel_no, mon, label]/' + \
-        'day[wday, xday, title, event, date, ordinal, overlap, bankholiday]/' + \
-        'entry[time_start, time_end, duration, title]'
+
     @polyrex = Polyrex.new(@schema, id_counter: @id)
     year_start = months[0][0][-1]
     @polyrex.summary.year = @year
@@ -362,14 +493,14 @@ class PolyrexCalendar
                 week_i += 1 if x.wday == 6
                 h = {wday: x.wday.to_s, xday: x.day.to_s, \
                   title: Date::DAYNAMES[k], date: x.strftime("%Y-%b-%d"), \
-                  ordinal: x.day.to_i.ordinal}
+                  ordinal: ordinal(x.day.to_i)}
               else
                 #if blank find the nearest date in the week and calculate this date
                 # check right and if nothing then it's at the end of the month
                 x = week[-1] ? (week[-1] - (7-(k+1))) : week[0] + k
                 h = {wday: x.wday.to_s, xday: x.day.to_s, \
                   title: Date::DAYNAMES[k], date: x.strftime("%Y-%b-%d"), \
-                  ordinal: x.day.to_i.ordinal, overlap: 'true'}
+                  ordinal: ordinal(x.day.to_i), overlap: 'true'}
               end
 
               create.day(h)
@@ -381,6 +512,10 @@ class PolyrexCalendar
 
   end
   
+  def ordinal
+    ( (10...20).include?(self) ? 'th' : %w{ th st nd rd th th th th th th }[self % 10] )
+  end
+
   def slotted_sort(a)
 
     upper = 36000 # upper slot value
@@ -406,13 +541,5 @@ class PolyrexCalendar
     a = b.+([nil] * max_slots).take(max_slots).reverse
   end
   
-  def generate_webpage(xml, xsl)
-    
-    # transform the xml to html
-    doc = Nokogiri::XML(xml)
-    xslt  = Nokogiri::XSLT(xsl)
-    html =  xslt.transform(doc).to_xml    
-    html
 
-  end
 end
