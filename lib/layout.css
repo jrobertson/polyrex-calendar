@@ -1,13 +1,12 @@
 body {background-color: transparent }
 
 #wrap {
-  background-color: transparent; 
-  border: 1px solid transparent;
-  margin: 0 auto;
+  background-color: #d93; 
+  margin: 0;
   margin-bottom: 0.6em;
   overflow: hidden;
-  padding-bottom: 4em;
-  width: 750px;   
+  padding-bottom: 0.5em;
+  width: 690px;   
 }
 
   #wrap h1 {
@@ -16,15 +15,45 @@ body {background-color: transparent }
     padding: 0.2em 0.4em;
   }
 
-  #wrap .table {
-    background-color: transparent;
-    float: left;
-    height: 13em;
-    padding: 1em 0.8em;
-    margin: 0.5em;
+  #wrap>div:first-child {
+    background-color: #458;
+    float:left;
+    width:405px;
   }
 
-    #wrap table {background-color: transparent; }
-      #wrap table td {text-align: right}
+  #wrap>div:first-child>div {
+    background-color: #894;
+    float: left;
+ 
+    padding: 0.4em 0.4em;
+    margin: 0.1em;
+  }
+
+    #wrap table {
+      background-color: transparent; 
+
+    }
+      #wrap table td {text-align: center}
 
 
+  #wrap>div:nth-child(2), #wrap>div:last-child {
+    background-color: #444;
+    font-size: 0.8em;
+    padding: 0.5em;
+    margin: 0.3em;
+
+  }
+  #wrap>div:nth-child(2) {
+    background-color: #444;
+    float: left;
+    page-break-after: always;
+
+  }
+
+    #wrap>div:nth-child(2)>ul {
+      background-color: transparent;
+    }
+
+      #wrap>div:nth-child(2)>ul>li {
+        background-color: transparent;  
+      }

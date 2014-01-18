@@ -8,30 +8,26 @@ require 'nokogiri'
 require 'chronic_duration'
 require 'chronic_cron'
 
-MINUTE = 60
-HOUR = MINUTE * 60
-DAY = HOUR * 24
-WEEK = DAY * 7
-MONTH = DAY * 30
 
+MONTH = DAY * 30
 
 
 h = {
   calendar: 'calendar[year]',
      month: 'month[n, title]',
       week: 'week[n]',
-       day: 'day[n, event, date, bankholiday, title]',
+       day: 'day[sdate, xday, event, bankholiday, title]',
      entry: 'entry[time_start, time_end, duration, title]'
 }
-visual_schema = %i(calendar month week day entry).map{|x| h[x]}.join '/'
+visual_schema = h.values.join '/'
 PolyrexObjects.new(visual_schema)
 
 module LIBRARY
 
   def fetch_file(filename)
-    
+
     lib = File.dirname(__FILE__)
-    File.read filename
+    File.read filename      
   end
 
   def generate_webpage(xml, xsl)
@@ -84,14 +80,14 @@ class PolyrexObjects::Month
     month_layout_css = fetch_file self.css_layout
     month_css        = fetch_file self.css_style
 
-    File.open('self.xml','w'){|f| f.write self.to_xml pretty: true}
-    File.open('month.xsl','w'){|f| f.write month_xsl }
+    File.write 'self.xml', self.to_xml(pretty: true)
+    File.write 'month.xsl', month_xsl 
     #html = Rexslt.new(month_xsl, self.to_xml).to_xml
 
     # add a css selector for the current day
     date = Time.now.strftime("%Y-%b-%d")
     doc = Rexle.new self.to_xml
-    e = doc.root.element("records/week/records/day/summary[date='#{date}']")
+    e = doc.root.element("records/week/records/day/summary[sdate='#{date}']")
     e.add Rexle::Element.new('css_style').add_text('selected')
 
     html = generate_webpage doc.xml, month_xsl
@@ -117,8 +113,8 @@ class PolyrexObjects::Week
     week_layout_css = fetch_file 'week_layout.css'
     week_css        = fetch_file 'week.css'
 
-    File.open('self.xml','w'){|f| f.write self.to_xml pretty: true}
-    File.open('week.xsl','w'){|f| f.write week_xsl }        
+    File.write 'self.xml', self.to_xml(pretty: true)
+    File.write 'week.xsl', week_xsl
     #html = Rexslt.new(week_xsl, self.to_xml).to_xml
     #html = xsltproc 'week_calendar.xsl', self.to_xml
 
@@ -135,6 +131,21 @@ class PolyrexObjects::Week
   end  
 end
 
+class PolyrexObjects::Day
+
+  def date()
+    Date.parse(self.sdate)
+  end
+
+  def wday()
+    self.date.wday
+  end
+
+  def day()
+    self.date.day
+  end
+end
+
 class PolyrexCalendar
   include LIBRARY
 
@@ -146,15 +157,14 @@ class PolyrexCalendar
     opts = {year: Time.now.year.to_s}.merge(options)
     @year = opts[:year]
 
-    @h = {
+    h = {
       calendar: 'calendar[year]',
          month: 'month[n, title]',
           week: 'week[n]',
-           day: 'day[n, event, date, bankholiday]',
+           day: 'day[sdate, xday, event, bankholiday]',
          entry: 'entry[time_start, time_end, duration, title]'
     }
-    schema = %i(calendar month day entry).map{|x| @h[x]}.join '/'
-    #@visual_schema = %i(calendar month week day entry).map{|x| @h[x]}.join '/'
+    schema = %i(calendar month day entry).map{|x| h[x]}.join '/'
 
 
     if calendar_file then
@@ -174,12 +184,15 @@ class PolyrexCalendar
 
         @polyrex.create.month no: month.to_s, title: Date::MONTHNAMES[month]  do |create|
           days.each do |x|
-            create.day  n: x.day, wday: x.wday, date: x.strftime("%Y-%b-%d")
+            create.day sdate: x.strftime("%Y-%b-%d"), xday: x.day.to_s
           end
         end
       end
 
     end
+
+    visual_schema = h.values.join '/'
+    PolyrexObjects.new(visual_schema)
 
     @xsl = fetch_file 'calendar.xsl'
     @css = fetch_file 'layout.css'
@@ -210,7 +223,7 @@ class PolyrexCalendar
 
     px = Polyrex.new(@schema, id_counter: @id)
     px.summary.year = @year
-    (1..12).each {|n| px.add self.month(n, strict: true) }
+    (1..12).each {|n| px.add self.month(n, moday_week: true) }
 
     px.xslt = 'kplanner.xsl'
     px.css_layout = 'monthday_layout.css'
@@ -236,46 +249,30 @@ class PolyrexCalendar
     
   end
 
-  def month(m, strict: false)
+  def month(m, monday_week: false)
 
-    cal_month = @polyrex.records[m-1]
+    if monday_week == true
 
-    if strict == true then
+      pxmonth = make_month(m) do |a, wday|
 
-      days_in_month = cal_month.xpath('records/week/records/.')\
-        .select {|x| Date.parse(x.text('summary/date')).month == m}
+        # Monday start
+        # wdays: 1 = Monday, 0 = Sunday
 
-      doc_month = Rexle.new cal_month.to_xml
-      records = doc_month.root.element 'records'
-      records.insert_before Rexle::Element.new('records')
+        r = case wday
 
-      records.delete
+          # the 1st day of the month is a Monday, add no placeholders
+          when 1 then  a
 
-      pxmonth = PolyrexObjects::Month.new doc_month.root
+          # the 1st day is a Sunday, add 6 placeholders before that day
+          when 0 then Array.new(6) + a
 
-      a = days_in_month
-      i = a[0].text('summary/wday').to_i
-
-      a2 = if i > 1 then
-        Array.new(i - 1) + a
-      elsif i < 1 then
-        Array.new(6) + a
-      else
-        a
-      end
-
-      a2.each_slice(7) do |days_in_week|
-
-        pxweek = PolyrexObjects::Week.new \
-                Rexle.new('<week><summary/><records/></week>').root
-
-        days_in_week.each do |day|
-
-          day = Rexle.new("<day><summary/><records/></day>") unless day
-          pxweek.add PolyrexObjects::Day.new(day.root)
+          # add a few placeholders before the 1st day          
+          else Array.new(wday - 1) + a
         end
 
-        pxmonth.add pxweek
+        r
+
+
       end
 
       pxmonth.xslt = 'monthday_calendar.xsl'
@@ -284,11 +281,29 @@ class PolyrexCalendar
       pxmonth
 
     else
-      cal_month.xslt = 'month_calendar.xsl'
-      cal_month.css_layout = 'month_layout.css'
-      cal_month.css_style = 'month.css'
 
-      cal_month
+      pxmonth = make_month(m) do |a, wday|
+
+        # Sunday start
+        # wdays: 1 = Monday, 0 = Sunday
+
+        r = case wday
+
+          # the 1st day of the month is a Sunday, add no placeholders
+          when 0 then  a
+
+          # add a few placeholders before the 1st day          
+          else Array.new(6 - wday) + a
+        end
+
+        r
+
+      end
+
+      pxmonth.xslt = 'month_calendar.xsl'
+      pxmonth.css_layout = 'month_layout.css'
+      pxmonth.css_style = 'month.css'
+      pxmonth
     end
 
   end
@@ -321,6 +336,7 @@ class PolyrexCalendar
 
     m = DateTime.now.month
     thisweek = self.month(m).records.find do |week|
+
       now = DateTime.now
       #week_no = now.cwday < 7 ? now.cweek - 1: now.cweek
       week_no = now.cweek
@@ -385,8 +401,7 @@ class PolyrexCalendar
 
     polyrex.records.each do |day|
 
-      d1 = Date.parse(day.date)
-      sd = d1.strftime("%Y-%b-%d ")
+      sd = day.date.strftime("%Y-%b-%d ")
       m,w,i = @day[d1]
 
       cal_day = @polyrex.records[m].week[w].day[i]
@@ -442,6 +457,58 @@ class PolyrexCalendar
       end  
     end 
     
+  end
+
+  def make_month(m)
+
+    cal_month = @polyrex.records[m-1]
+    days_in_month = cal_month.records
+    pxmonth = cal_month.clone
+    pxmonth.records.each(&:delete)
+
+    a = days_in_month
+
+    i = a[0].wday
+
+    a2 = yield(a, i)
+
+    a2.each_slice(7) do |days_in_week|
+
+      pxweek = PolyrexObjects::Week.new
+
+      days_in_week.each do |day| 
+
+        new_day = day ? day.deep_clone : PolyrexObjects::Day.new
+        pxweek.add new_day
+      end
+
+      pxmonth.add pxweek
+    end
+
+    week1 = pxmonth.week[0]
+
+    other_days = week1.day.select{|day| day.sdate.empty? }
+    start_date = week1.day[other_days.length].date
+
+    other_days.reverse.each.with_index do |day, i|
+      day.sdate = (start_date - (i+1)).strftime("%Y %b %d")
+      day.xday = day.date.day.to_s
+    end
+
+    last_week = pxmonth.week[-1]
+
+    gap = 7 - last_week.records.length
+    end_date = last_week.day.last.date
+
+    gap.times do |i|
+
+      day = PolyrexObjects::Day.new
+      day.sdate = (end_date + (i+1)).strftime("%Y %b %d")
+      day.xday = day.date.day.to_s
+      last_week.add day
+    end
+
+    pxmonth
   end
     
   def ordinal(val)

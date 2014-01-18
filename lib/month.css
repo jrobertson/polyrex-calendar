@@ -9,12 +9,14 @@
 }
 
 #wrap  table{
-  background-color: rgba(230, 230, 170, 0.1);
+  background-color: rgba(230, 230, 170, 0.6);
   border: none;
+  font-family: Helvetica, Verdana, Serif;
+  font-size: 1.2em;
 }
 
 #wrap>table th{
-  background-color: rgba(180, 180, 150, 0.5);
+  background-color: rgba(180, 180, 150, 0.8);
   color: rgba(80, 80, 50, 0.8);
   border: 1px solid rgba(80, 80, 50, 0.8);
 }
@@ -24,17 +26,21 @@
 }
 
 #wrap>table tr>td{
-  background-color: rgba(230, 230, 70, 0.4);
-  color: rgba(130, 130, 30,  1);
-  border: 1px solid rgba(80, 80, 50, 0.8);
+  background-color: rgba(130, 130, 160, 0.3);
 }
 
-#wrap>table tr>td.selected{
+#wrap>table tr>td>div{
+  background-color: rgba(230, 230, 70, 0.4);
+  color: rgba(80, 80, 30,  1);
+  margin: 0.3em;
+}
+
+#wrap>table tr>td>div.selected{
   /*background-color: transparent;*/
   border: 5px solid rgba(240, 150, 100, 0.9);  
   border-radius: 15px;
 }
 
-#wrap>table tr>td:nth-child(1), #wrap>table tr>td:nth-child(7){
+#wrap>table tr>td:nth-child(1)>div, #wrap>table tr>td:nth-child(7)>div{
   background-color: rgba(230, 230, 70, 0.2);
 }

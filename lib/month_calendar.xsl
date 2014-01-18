@@ -42,25 +42,32 @@
 </xsl:template>
 
 <xsl:template match="records/day">
+<td>
+<div>
   <xsl:apply-templates select="summary"/>
+  <xsl:apply-templates select="records"/>
+</div>
+</td>
 </xsl:template>
 
 <xsl:template match="day/summary">
-  <xsl:element name="td">
+
     <xsl:if test="css_style">
       <xsl:attribute name="class"><xsl:value-of select="css_style"/></xsl:attribute>
     </xsl:if>
-    <div>
-      <xsl:if test="title!=''">
-        <xsl:value-of select="xday"/>
-      </xsl:if>
-    </div>
 
-      <div><xsl:value-of select="bankholiday"/></div>
-      <div><xsl:value-of select="event"/></div>
+    <div><xsl:value-of select="xday"/></div>
+    <div><xsl:value-of select="bankholiday"/></div>
+    <div><xsl:value-of select="event"/></div>
 
-  </xsl:element>
 </xsl:template>
 
+<xsl:template match="records/entry">
+  <xsl:apply-templates select="summary"/>
+</xsl:template>
+
+<xsl:template match="entry/summary">
+      <strong><xsl:value-of select="title"/></strong>
+</xsl:template>
 
 </xsl:stylesheet>
