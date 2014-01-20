@@ -26,8 +26,11 @@ module LIBRARY
 
   def fetch_file(filename)
 
-    lib = File.dirname(__FILE__)
-    File.read filename      
+    #lib = File.dirname(__FILE__)
+    #File.read filename      
+    lib = 'http://rorbuilder.info/r/ruby/polyrex-calendar'
+    open(File.join(lib, filename), 
+      'UserAgent' => 'PolyrexCalendar'){|x| x.read }
   end
 
   def generate_webpage(xml, xsl)
@@ -80,8 +83,6 @@ class PolyrexObjects::Month
     month_layout_css = fetch_file self.css_layout
     month_css        = fetch_file self.css_style
 
-    File.write 'self.xml', self.to_xml(pretty: true)
-    File.write 'month.xsl', month_xsl 
     #html = Rexslt.new(month_xsl, self.to_xml).to_xml
 
     # add a css selector for the current day
@@ -89,6 +90,10 @@ class PolyrexObjects::Month
     doc = Rexle.new self.to_xml
     e = doc.root.element("records/week/records/day/summary[sdate='#{date}']")
     e.add Rexle::Element.new('css_style').add_text('selected')
+
+    File.write 'self.xml', self.to_xml(pretty: true)
+    File.write 'month.xsl', month_xsl 
+
 
     html = generate_webpage doc.xml, month_xsl
     {self.title.downcase[0..2] + '_calendar.html' => html, 
@@ -393,7 +398,8 @@ class PolyrexCalendar
 
       dt = DateTime.parse(event[:date])
       m, d = dt.month, dt.day
-      @polyrex.records[m-1].day[d-1].method(daytype).call event[:title]
+      event_label = "%s at %s" % [event[:title], dt.strftime("%H:%M%p")]
+      @polyrex.records[m-1].day[d-1].method(daytype).call event_label
     end
   end
 

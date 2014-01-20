@@ -15,7 +15,7 @@
   <body>
     <div id="wrap">
   <h1><xsl:value-of select="summary/title"/><xsl:text> </xsl:text><xsl:value-of select="summary/year"/></h1>
-  <table border="1">
+  <table>
     <tr><th>Sunday</th><th>Monday</th><th>Tuesday</th><th>Wednesday</th><th>Thursday</th><th>Friday</th><th>Saturday</th></tr>
       <xsl:apply-templates select="records"/>
   </table>
@@ -43,31 +43,29 @@
 
 <xsl:template match="records/day">
 <td>
+  <xsl:if test="summary/css_style">
+    <xsl:attribute name="class"><xsl:value-of select="summary/css_style"/></xsl:attribute>
+  </xsl:if>
+
 <div>
-  <xsl:apply-templates select="summary"/>
-  <xsl:apply-templates select="records"/>
+    <div><xsl:value-of select="summary/xday"/></div>
+    <div><xsl:value-of select="summary/bankholiday"/></div>
+    <ul>
+      <xsl:if test="summary/event and not(summary/event='')">
+      <li><strong><xsl:value-of select="summary/event"/></strong></li>
+      </xsl:if>
+      <xsl:apply-templates select="records"/>
+    </ul>
 </div>
 </td>
 </xsl:template>
 
-<xsl:template match="day/summary">
-
-    <xsl:if test="css_style">
-      <xsl:attribute name="class"><xsl:value-of select="css_style"/></xsl:attribute>
-    </xsl:if>
-
-    <div><xsl:value-of select="xday"/></div>
-    <div><xsl:value-of select="bankholiday"/></div>
-    <div><xsl:value-of select="event"/></div>
-
-</xsl:template>
 
 <xsl:template match="records/entry">
-  <xsl:apply-templates select="summary"/>
+  <xsl:if test="summary/title and not(summary/title='')">
+  <li><xsl:value-of select="summary/title"/></li>
+  </xsl:if>
 </xsl:template>
 
-<xsl:template match="entry/summary">
-      <strong><xsl:value-of select="title"/></strong>
-</xsl:template>
 
 </xsl:stylesheet>
