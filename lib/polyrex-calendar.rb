@@ -16,7 +16,7 @@ h = {
   calendar: 'calendar[year]',
      month: 'month[n, title]',
       week: 'week[n]',
-       day: 'day[sdate, xday, event, bankholiday, title]',
+       day: 'day[sdate, xday, event, bankholiday, title, sunrise, sunset]',
      entry: 'entry[time_start, time_end, duration, title]'
 }
 visual_schema = h.values.join '/'
@@ -166,7 +166,7 @@ class PolyrexCalendar
       calendar: 'calendar[year]',
          month: 'month[n, title]',
           week: 'week[n]',
-           day: 'day[sdate, xday, event, bankholiday]',
+           day: 'day[sdate, xday, event, bankholiday, title, sunrise, sunset]',
          entry: 'entry[time_start, time_end, duration, title]'
     }
     schema = %i(calendar month day entry).map{|x| h[x]}.join '/'
@@ -389,8 +389,26 @@ class PolyrexCalendar
       @polyrex.records[m-1].day[d-1].create.entry record
     end
   end
+
+  def import_sunrise_times(dynarex)
+    import_suntimes dynarex, :sunrise=
+  end
+
+  def import_sunset_times(dynarex)
+    import_suntimes dynarex, :sunset=
+  end
   
   private
+
+  def import_suntimes(dynarex, event_type=:sunrise=)
+
+    dynarex.flat_records.each do |event|
+
+      dt = DateTime.parse(event[:date])
+      m, d = dt.month, dt.day
+      @polyrex.records[m-1].day[d-1].method(event_type).call event[:time]
+    end
+  end
   
   def import_dynarex(dynarex, daytype=:event=)
 
@@ -398,7 +416,14 @@ class PolyrexCalendar
 
       dt = DateTime.parse(event[:date])
       m, d = dt.month, dt.day
-      event_label = "%s at %s" % [event[:title], dt.strftime("%H:%M%p")]
+
+      event_label = case daytype
+        when :event=
+          "%s at %s" % [event[:title], dt.strftime("%H:%M%p")]
+        else
+          "%s" % event[:title]
+      end
+
       @polyrex.records[m-1].day[d-1].method(daytype).call event_label
     end
   end
