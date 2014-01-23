@@ -1,51 +1,127 @@
-# Create a Yearly, Monthly, or Weekly Calendar
+# Adding entries to a Polyrex Calendar
 
-## Example
+There are various ways to add an entry to a Polyrex Calendar, either from a Dynarex, or Polyrex document, or from direct access to the day object.
 
-    require 'polyrex-calendar' 
+## Creating a Polyrex Calendar
+
+    require 'polyrex-calendar'
+
+    pc = PolyrexCalendar.new
+    pc.save 'polyrex.xml'
+
+## Adding an individual event for a specific day
+
+    require 'polyrex-calendar'
+
+    pc = PolyrexCalendar.new 'polyrex.xml'
+
+    # select January 25th; note: The index for the month and day starts at 0
+    pc.records[0].day[24].event = "Doctor's appointment at 14:30"
+    pc.save
+
+## Adding events from a Dynarex document
+
+    require 'polyrex-calendar'
+
+    pc = PolyrexCalendar.new 'polyrex.xml'
+
+    s =<<EOF
+    &lt;?dynarex schema="entries[title,tags]/entry(date,title,reminder,recurring)"?&gt;
+    title: Events 2014
+    tags: events 2014 dates appointments schedule
+    --+
+
+    date: 21 Jan @ 12:30
+    title: building 44
+    reminder: 2 hours before
+
+    date: 27 Feb @ 14:20
+    title: Dentist 6 month checkup
+    reminder: 2 hours before
+    EOF
+
+    dx = Dynarex.new
+    dx.import s
+
+    pc.import! dx
+    pc.save
+
+## Adding events from a Polyrex document
+
+In this example not only is an event added, entries relating to that day can also be stored.
+
+    require 'polyrex-calendar'
+
+    pc = PolyrexCalendar.new 'polyrex.xml'
 
     dates =<<EOF
-    <?polyrex schema="events/dayx[date, title]/entryx[start_time, end_time, duration, title]" ?>
-    26-Dec-2013
+    &lt;?polyrex schema="events/day[sdate, title]/entry[start_time, end_time, duration, title]" ?&gt;
+    26-Feb-2014
       11:00 (1 hour) Review application
-    27-Dec-2013 14:50 Dentist  
+    27-Feb-2014 14:50 Dentist  
       14:50 Dentist
       15:50 Shopping
-    29-Dec-2013 14:00 Car trip xyz
+    28-Feb-2014 14:00 Car trip xyz
       14:00 Car trip xyz
     EOF
 
-    px = Polyrex.new 
+    px = Polyrex.new
     px.format_masks[1] = '([!start_time] \([!duration]\) [!title]|' +  \
       '[!start_time]-[!end_time] [!title]|' + \
       '[!start_time] [!title])'
 
     px.import(dates)
+    pc.import_events px
 
-    cal = PolyrexCalendar.new
-    cal.import! px
+    pc.save
 
-    h = cal.this_month.to_webpage
-    h.each {|filename, buffer| File.open(filename, 'w'){|f| f.write buffer}}
+## Displaying the various calendar formats
 
-    h = cal.this_week.to_webpage
-    h.each {|filename, buffer| File.open(filename, 'w'){|f| f.write buffer}}
-
-    h = cal.to_webpage
-    h.each {|filename, buffer| File.open(filename, 'w'){|f| f.write buffer}}
-
-## Screenshots
+The calendar can generate various calendar formats including, monthly, weekly, yearly, and monthly planner as show below:
 
 ### Monthly calendar
 
-![monthly calendar screenshot](http://www.jamesrobertson.eu/images/2013/dec/24/dec-monthly-calendar-screenshot.png)
+    require 'polyrex-calendar'
+
+    pc = PolyrexCalendar.new 'polyrex.xml'
+    h = pc.this_month.to_webpage
+
+    # saves the HTML, and CSS to files on disk
+    h.each{|filename, buffer| File.write filename, buffer}
+
+![monthly calendar screenshot](http://www.jamesrobertson.eu/images/2014/jan/23/monthly-calendar.png)
 
 ### Weekly calendar
 
-![weekly calendar screenshot](http://www.jamesrobertson.eu/images/2013/dec/24/dec-weekly-calendar-screenshot.png)
+    require 'polyrex-calendar'
+
+    pc = PolyrexCalendar.new 'polyrex.xml'
+    h = pc.this_week.to_webpage
+    h.each{|filename, buffer| File.write filename, buffer}
+
+![weekly planner screenshot](http://www.jamesrobertson.eu/images/2014/jan/23/weekly-planner.png)
 
 ### Yearly calendar
 
-![yearly calendar screenshot](http://www.jamesrobertson.eu/images/2013/dec/24/dec-yearly-calendar-screenshot.png)
+    require 'polyrex-calendar'
 
-polyrexcalendar calendar yearly monthly weekly
+    pc = PolyrexCalendar.new 'polyrex.xml'
+    h = pc.to_webpage
+    h.each{|filename, buffer| File.write filename, buffer}
+
+![yearly planner screenshot](http://www.jamesrobertson.eu/images/2014/jan/23/yearly-planner.png)
+
+### Kitchen monthly planner
+
+    require 'polyrex-calendar'
+
+    pc = PolyrexCalendar.new 'polyrex.xml'
+    h = pc.kitchen_planner.to_webpage
+    h.each{|filename, buffer| File.write filename, buffer}
+
+![kitchen monthly planner screenshot](http://www.jamesrobertson.eu/images/2014/jan/23/kitchen-monthly-planner.png)
+
+## Resources
+
+* [jrobertson/polyrex-calendar](https://github.com/jrobertson/polyrex-calendar)
+
