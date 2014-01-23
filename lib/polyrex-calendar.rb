@@ -26,11 +26,8 @@ module LIBRARY
 
   def fetch_file(filename)
 
-    #lib = File.dirname(__FILE__)
-    #File.read filename      
-    lib = 'http://rorbuilder.info/r/ruby/polyrex-calendar'
-    open(File.join(lib, filename), 
-      'UserAgent' => 'PolyrexCalendar'){|x| x.read }
+    lib = File.dirname(__FILE__)
+    File.read filename      
   end
 
   def generate_webpage(xml, xsl)
@@ -421,11 +418,12 @@ class PolyrexCalendar
 
     polyrex.records.each do |day|
 
-      sd = day.date.strftime("%Y-%b-%d ")
-      m,w,i = @day[d1]
+      dt = day.date
 
-      cal_day = @polyrex.records[m].week[w].day[i]
-    
+      sd = dt.strftime("%Y-%b-%d ")
+      m, i = dt.month, dt.day
+      cal_day = @polyrex.records[m - 1].day[i-1]
+
       cal_day.event = day.title
 
       if day.records.length > 0 then
@@ -460,7 +458,7 @@ class PolyrexCalendar
 
         seconds = entries.keys.map{|x| Time.parse(x) - Time.parse('08:00')}
 
-        unless d1.saturday? or d1.sunday? then
+        unless dt.saturday? or dt.sunday? then
           rows = slotted_sort(seconds).map do |x| 
             (Time.parse('08:00') + x.to_i).strftime("%H:%M") if x
           end

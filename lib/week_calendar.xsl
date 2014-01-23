@@ -10,6 +10,14 @@
   </head>
   <body>
     <div id="wrap">
+    <header>
+      <nav>
+      <ul>
+        <li><a href='/'>home</a></li>
+        <li><a href='/calendar/'>calendar</a></li>
+        <li>weekly planner</li>
+      </ul>
+      </nav>
       <h1>        
         <xsl:choose>
           <xsl:when test="summary/label=''">
@@ -21,6 +29,7 @@
         </xsl:choose>
         : Week <xsl:value-of select="summary/no"/>
       </h1>
+      </header>
       <xsl:apply-templates select='summary'/>
       <xsl:apply-templates select='records'/>
     </div>

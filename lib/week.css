@@ -1,27 +1,48 @@
 /* week.css*/
 
-#wrap h1 {
-  background-color: transparent; 
-  font-size: 1.4em;
-  margin: 0.3em 0.3em; 
-  padding: 0.4em 0.2em;
+#wrap>header {
+  background-color: transparent;
 }
 
+  #wrap>header>h1 {
+    background-color: transparent; 
+    color: #987;
+    font-size: 1.4em;
+    margin: 0.3em 0.3em; 
+    padding: 0.4em 0.2em;
+  }
+
+
+  #wrap>header>nav:first-child>ul{
+    background-color: transparent;
+    list-style-type: none;
+  }
+    #wrap>header>nav:first-child>ul>li {
+      background-color: transparent;
+      display: inline;
+    }
+
+    #wrap>header>nav:first-child>ul>li~li:before {
+      background-color: transparent;
+      content: "> ";
+    }
+
 #wrap div ul { 
-  background-color: #ee9;
+  background-color: transparent;
   list-style-type: none;
   padding: 0.1em 1em;
   margin: 0.3em 0.2em;
 }
 
   #wrap div ul li { 
-    background-color: #492;
+    background-color: transparent;
     padding: 0.2em 0.2em;
     margin: 0.2em 0.2em;
   }
 
   #wrap div ul li.selected { 
-    background-color: rgba(200,200,150,1);
+    background-color: transparent;
+    border: 4px solid rgba(200,200,150,0.6);
   }
 
 

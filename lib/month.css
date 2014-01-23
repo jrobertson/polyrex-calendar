@@ -6,9 +6,15 @@
   background-color: transparent;
 }
 
+  #wrap>header>nav {
+    background-color:  #aba;
+    padding: 0.3em 0.8em;
+  }
+
   #wrap>header>nav:first-child>ul{
     background-color: transparent;
     list-style-type: none;
+    padding: 0.2em;
   }
     #wrap>header>nav:first-child>ul>li {
       background-color: transparent;

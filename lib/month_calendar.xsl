@@ -14,6 +14,21 @@
 
   <body>
     <div id="wrap">
+    <header>
+      <nav>
+      <ul>
+        <li><a href='/'>home</a></li>
+        <li>calendar</li>
+      </ul>
+      </nav>
+      <nav>
+        <ul>
+          <li><a href="kplanner.html">kitchen monthly planner</a></li>
+          <li><a href="weekly_planner.html">weekly planner</a></li>
+          <li><a href="calendar.html">yearly planner</a></li>
+        </ul>
+      </nav>
+    </header>
   <h1><xsl:value-of select="summary/title"/><xsl:text> </xsl:text><xsl:value-of select="summary/year"/></h1>
   <table>
     <tr><th>Sunday</th><th>Monday</th><th>Tuesday</th><th>Wednesday</th><th>Thursday</th><th>Friday</th><th>Saturday</th></tr>
