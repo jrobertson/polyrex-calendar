@@ -6,7 +6,7 @@ body {background-color: transparent }
   margin-bottom: 0.6em;
   overflow: hidden;
   padding-bottom: 0.5em;
-  width: 690px;   
+  width: 680px;   
 }
 
   #wrap h1 {
@@ -18,7 +18,7 @@ body {background-color: transparent }
   #wrap>div:first-child {
     background-color: #458;
     float:left;
-    width:405px;
+    width:400px;
   }
 
   #wrap>div:first-child>div {
@@ -31,7 +31,8 @@ body {background-color: transparent }
 
     #wrap table {
       background-color: transparent; 
-
+      font-family: Helvetica, Verdana, Serif;
+      font-size: 0.7em;
     }
       #wrap table td {text-align: center}
 
@@ -46,6 +47,7 @@ body {background-color: transparent }
   #wrap>div:nth-child(2) {
     background-color: #444;
     float: left;
+    width: 250px;
     page-break-after: always;
 
   }

@@ -2,6 +2,25 @@
   background-color: rgba(180, 180, 150, 0.1);
 }
 
+#wrap>header {
+  background-color: transparent;
+}
+
+  #wrap>header>nav:first-child>ul{
+    background-color: transparent;
+    list-style-type: none;
+  }
+    #wrap>header>nav:first-child>ul>li {
+      background-color: transparent;
+      display: inline;
+    }
+
+    #wrap>header>nav:first-child>ul>li~li:before {
+      background-color: transparent;
+      content: "> ";
+    }
+
+
 #wrap>h1{
   background-color: transparent;
   color: rgba(80, 80, 50, 0.8);

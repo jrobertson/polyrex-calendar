@@ -15,7 +15,7 @@ MONTH = DAY * 30
 h = {
   calendar: 'calendar[year]',
      month: 'month[n, title]',
-      week: 'week[n]',
+      week: 'week[n, mon, no, label]',
        day: 'day[sdate, xday, event, bankholiday, title, sunrise, sunset]',
      entry: 'entry[time_start, time_end, duration, title]'
 }
@@ -126,7 +126,7 @@ class PolyrexObjects::Week
     # add a css selector for the current day
     date = Time.now.strftime("%Y-%b-%d")
     doc = Rexle.new self.to_xml
-    e = doc.root.element("records/day/summary[date='#{date}']")
+    e = doc.root.element("records/day/summary[sdate='#{date}']")
 
     e.add Rexle::Element.new('css_style').add_text('selected')
 
@@ -169,7 +169,7 @@ class PolyrexCalendar
            day: 'day[sdate, xday, event, bankholiday, title, sunrise, sunset]',
          entry: 'entry[time_start, time_end, duration, title]'
     }
-    schema = %i(calendar month day entry).map{|x| h[x]}.join '/'
+    @schema = %i(calendar month day entry).map{|x| h[x]}.join '/'
 
 
     if calendar_file then
@@ -182,14 +182,14 @@ class PolyrexCalendar
 
       a = (Date.parse(@year + '-01-01')...Date.parse(@year.succ + '-01-01')).to_a
 
-      @polyrex = Polyrex.new(schema, id_counter: @id)
+      @polyrex = Polyrex.new(@schema, id_counter: @id)
       @polyrex.summary.year = @year
 
       a.group_by(&:month).each do |month, days| 
 
         @polyrex.create.month no: month.to_s, title: Date::MONTHNAMES[month]  do |create|
           days.each do |x|
-            create.day sdate: x.strftime("%Y-%b-%d"), xday: x.day.to_s
+            create.day sdate: x.strftime("%Y-%b-%d"), xday: x.day.to_s, title: Date::DAYNAMES[x.wday]
           end
         end
       end
@@ -226,14 +226,15 @@ class PolyrexCalendar
 
   def kitchen_planner()
 
-    px = Polyrex.new(@schema, id_counter: @id)
-    px.summary.year = @year
-    (1..12).each {|n| px.add self.month(n, moday_week: true) }
+    #px = Polyrex.new(@schema, id_counter: @id)
+    #px.summary.year = @year
+    #(1..12).each {|n| px.add self.month(n, monday_week: true) }
+    px = @polyrex
 
     px.xslt = 'kplanner.xsl'
     px.css_layout = 'monthday_layout.css'
     px.css_style = 'monthday.css'
-    px.filename = summary.year.to_s + '-kitchen-planner.html'
+    px.filename = @year + '-kitchen-planner.html'
 
     px
     
@@ -243,7 +244,7 @@ class PolyrexCalendar
 
     px = Polyrex.new(@schema, id_counter: @id)
     px.summary.year = @year
-    (1..12).each {|n| px.add self.month(n, strict: true) }
+    (1..12).each {|n| px.add self.month(n, monday_week: true) }
 
     px.xslt = 'calendar.xsl'
     px.css_layout = 'layout.css'
@@ -312,6 +313,8 @@ class PolyrexCalendar
     end
 
   end
+  def month_day()
+  end
 
   def months
     @polyrex.records
@@ -339,31 +342,17 @@ class PolyrexCalendar
   
   def this_week()
 
-    m = DateTime.now.month
-    thisweek = self.month(m).records.find do |week|
+    dt = DateTime.now
+    days = @polyrex.records[dt.month-1].day
 
-      now = DateTime.now
-      #week_no = now.cwday < 7 ? now.cweek - 1: now.cweek
-      week_no = now.cweek
-      week.no == week_no.to_s
-    end
+    r = days.find {|day| day.date.cweek == dt.cweek }    
+    pxweek = PolyrexObjects::Week.new
+    pxweek.mon = Date::MONTHNAMES[dt.month]
+    pxweek.no = dt.cweek.to_s
+    pxweek.label = ''
+    days[days.index(r),7].each{|day| pxweek.add day }
 
-    day = (Time.now - DAY * (Time.now.wday - 1)).day
-
-    days_in_week = self.this_month.xpath('records/week/records/.')\
-      .select {|x| x.text('summary/xday').to_i >= day}\
-      .take 7
-
-    doc_week = Rexle.new thisweek.to_xml
-    records = doc_week.root.element 'records'
-    records.insert_before Rexle::Element.new('records')
-
-    records.delete
-
-    week = doc_week.root.element 'records'
-    days_in_week.each {|day| week.add day }
-    PolyrexObjects::Week.new doc_week.root
-
+    pxweek
   end
 
   def this_month()

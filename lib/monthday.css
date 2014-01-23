@@ -1,0 +1,94 @@
+body {
+  background-color: #39a;
+  margin: 0em; 0.1em padding: 0em 0.1em;
+}
+#wrap {
+  background-color: #49b;
+  border: none;
+  font-family: helvetica, verdana, sans;
+  margin: 0em 0.1em; padding: 0em 0.1em;
+}
+  #wrap header{
+    background-color: #99b;
+    overflow: hidden
+    margin: 0em; 0.1em padding: 0em 0.1em;
+  }
+
+  #wrap>header>nav:first-child>ul{
+    background-color: transparent;
+    list-style-type: none;
+  }
+    #wrap>header>nav:first-child>ul>li {
+      background-color: transparent;
+      display: inline;
+    }
+
+    #wrap>header>nav:first-child>ul>li~li:before {
+      background-color: transparent;
+      content: "> ";
+    }
+
+  #wrap header>h1{
+    background-color: transparent;
+    color: rgba(180,180,180, 0.8);
+    font-size: 2.3em;
+    margin: 0em; 0.1em padding: 0em 0.1em;
+  }
+  #wrap header>h2{
+    background-color: transparent;
+    color: #fff;
+    font-size: 2.3em;
+    margin: 0em; 0.1em padding: 0em 0.1em;
+  }
+  #wrap>ul>li>div{
+
+    background-color: #341;
+    float:left;
+  }
+  #wrap>ul>li>div:first-child{
+    background-color: rgba(50, 50, 50, 0.4);
+    color: #fff;
+    font-size: 1.7em;
+    margin-top: 0.1em;
+    padding: 0.2em 0.1em 0.2em 0.1em;
+    text-align: right;
+    width: 1.1em;
+  }
+  #wrap>ul>li>div:nth-child(2){
+    background-color: transparent;
+    color: rgba(50, 50, 50, 0.8);
+    font-size: 1.3em;
+    margin: 0.2em 0.2em;
+    padding: 0.4em 0.3em 0.3em 0.3em;
+    width: 2.4em;
+
+  }
+  #wrap>ul>li>div:nth-child(3){
+    background-color: transparent;
+    color: #000;
+    float: right;
+    font-size: 0.65em;
+    margin: 3.4em 0.0em 0.1em 0.2em;
+    padding: 0.1em 0.2em;
+
+  }
+
+  #wrap>ul>li>div:nth-child(3)>span{
+    background-color: transparent;
+    font-weight: 700;
+  }
+  #wrap>ul {
+    background-color: rgba(250,230,230, 0.5);
+    list-style-type: none;
+    margin:0.1em 0.2em; padding: 0.1em 0.2em;
+    page-break-after: always;
+  }
+
+    #wrap>ul>li {
+      background-color: transparent;
+      border-bottom: 1px solid black;
+      margin:0em 0em; padding: 0.1em;
+      display: inline-block;
+      height: 3.15em;
+      width: 19em;
+    }
