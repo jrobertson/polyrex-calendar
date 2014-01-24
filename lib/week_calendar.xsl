@@ -59,28 +59,32 @@
       <xsl:attribute name="class"><xsl:value-of select="summary/css_style"/></xsl:attribute>
     </xsl:if>
     <xsl:apply-templates select='summary'/>
+  <ul>
     <xsl:apply-templates select='records'/>
+  </ul>
+  <div><xsl:value-of select="bankholiday"/></div>
   </xsl:element>
 </xsl:template>
 
 <xsl:template match='day/summary'>
     <h2><xsl:value-of select="title"/> <xsl:text>  </xsl:text><xsl:value-of select="xday"/><xsl:value-of select="ordinal"/></h2>
+<h3><xsl:value-of select="event"/></h3>
 </xsl:template>
 
 <xsl:template match='day/records'>
 <xsl:choose>
   <xsl:when test="entry">
-  <ul>
+
     <xsl:apply-templates select='entry'/>
-  </ul>
+
   </xsl:when>
   <xsl:otherwise>
-    <ul>
+
       <li></li>
       <xsl:if test="../summary/wday &gt; '0' and ../summary/wday &lt; '6'">
         <li></li>
       </xsl:if>
-    </ul>
+
   </xsl:otherwise>
 </xsl:choose>
 </xsl:template>
