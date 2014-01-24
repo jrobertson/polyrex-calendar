@@ -55,8 +55,8 @@
 
 <xsl:template match='day'>
   <xsl:element name="li">
-    <xsl:if test="summary/css_style">
-      <xsl:attribute name="class"><xsl:value-of select="summary/css_style"/></xsl:attribute>
+    <xsl:if test="summary/@class">
+      <xsl:attribute name="class"><xsl:value-of select="summary/@class"/></xsl:attribute>
     </xsl:if>
     <xsl:apply-templates select='summary'/>
   <ul>

@@ -17,6 +17,7 @@ body {
   #wrap>header>nav:first-child>ul{
     background-color: transparent;
     list-style-type: none;
+    margin: 0.2em; padding: 0.3em;
   }
     #wrap>header>nav:first-child>ul>li {
       background-color: transparent;
@@ -32,13 +33,13 @@ body {
     background-color: transparent;
     color: rgba(180,180,180, 0.8);
     font-size: 2.3em;
-    margin: 0em; 0.1em padding: 0em 0.1em;
+    margin: 0em 0.1em; padding: 0em 0.1em;
   }
   #wrap header>h2{
     background-color: transparent;
     color: #fff;
     font-size: 2.3em;
-    margin: 0em; 0.1em padding: 0em 0.1em;
+    margin: 0em 0.1em; padding: 0em 0.1em;
   }
   #wrap>ul>li>div{
 
@@ -90,5 +91,11 @@ body {
       margin:0em 0em; padding: 0.1em;
       display: inline-block;
       height: 3.15em;
-      width: 19em;
+      width: 18em;
+    }
+
+    #wrap>ul>li.selected {
+      background-color: transparent;
+      border: 5px solid rgba(240, 150, 100, 0.9);  
+      border-radius: 15px;
     }

@@ -12,7 +12,7 @@ body {background-color: transparent }
   }
 
   #wrap header>nav+nav {
-    background-color: #a98;
+    background-color: transparent;
     float: right; 
   }
   #wrap h1 {

@@ -1,5 +1,5 @@
 #wrap {
-  background-color: #d93; 
+  background-color: transparent; 
   margin: 0;
   margin-bottom: 0.6em;
   overflow: hidden;
@@ -12,12 +12,18 @@
     font-family: Helvetica, Verdana;
     font-size: 1.1em;
     margin: 0.5em; 
-    padding: 0.2em 0.4em;
+    padding: 0.5em 0.4em;
+  }
+
+  #wrap>div>header{
+    background-color: transparent;
+    margin-bottom: 1em;
   }
 
   #wrap>div>header>nav:first-child>ul{
     background-color: transparent;
     list-style-type: none;
+    margin: 0.2em; padding: 0.3em;
   }
     #wrap>div>header>nav:first-child>ul>li {
       background-color: transparent;
@@ -31,33 +37,42 @@
 
 
     #wrap>div:nth-child(2) {
-      background-color: #777;
+      background-color: transparent;
       padding: 0.3em;
       margin: 0.1em;
     }
     #wrap>div>ul {
-      background-color: #777;
+      background-color: transparent;
       list-style-type: none;  
       padding: 0.3em;
       margin: 0.1em;
     }
 
       #wrap>div:nth-child(2)>ul>li, #wrap>div:last-child>ul>li {
-        background-color: #aaa;  
+        background-color: transparent;  
         padding: 0.3em;
         margin: 0.1em;
       }
 
       #wrap>div:nth-child(2)>ul>li>span, #wrap>div:last-child>ul>li>span {
-        background-color: #9ab;  
+        background-color: transparent;  
         display: block; float: left; width: 4.4em;
        
       }
 
       #wrap>div:last-child {
-        background-color: #acc;
+        background-color: transparent;
         clear: both;
         -moz-column-count: 2; -moz-column-gap: 1em; -moz-column-rule: 1px solid black; -webkit-column-count: 2; -webkit-column-gap: 1em; -webkit-column-rule: 1px solid black;
         margin:0.1em 0.3em; 
         padding: 0.3em;
       }
+
+#wrap table{
+  background-color: transparent;
+}
+#wrap table tr td.selected{
+  background-color: transparent;
+  border: 2px solid rgba(240, 100, 100, 0.7);  
+
+}

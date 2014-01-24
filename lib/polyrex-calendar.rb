@@ -26,8 +26,11 @@ module LIBRARY
 
   def fetch_file(filename)
 
-    lib = File.dirname(__FILE__)
-    File.read File.join(lib,filename)
+    #lib = File.dirname(__FILE__)
+    #File.read filename      
+    lib = 'http://rorbuilder.info/r/ruby/polyrex-calendar'
+    open(File.join(lib, filename), 
+      'UserAgent' => 'PolyrexCalendar'){|x| x.read }
   end
 
   def generate_webpage(xml, xsl)
@@ -53,7 +56,6 @@ class Polyrex
     year_xsl        = fetch_file self.xslt
     year_layout_css = fetch_file self.css_layout
     year_css        = fetch_file self.css_style
-
     File.open('self.xml','w'){|f| f.write (self.to_xml pretty: true)}
     File.open(self.xslt,'w'){|f| f.write year_xsl }
     #html = Rexslt.new(month_xsl, self.to_xml).to_xml
@@ -84,15 +86,15 @@ class PolyrexObjects::Month
 
     # add a css selector for the current day
     date = Time.now.strftime("%Y-%b-%d")
-    doc = Rexle.new self.to_xml
-    e = doc.root.element("records/week/records/day/summary[sdate='#{date}']")
-    e.add Rexle::Element.new('css_style').add_text('selected')
+
+    e = self.element("records/week/records/day/summary[sdate='#{date}']")
+    e.attributes[:class] = 'selected' if e
 
     File.write 'self.xml', self.to_xml(pretty: true)
     File.write 'month.xsl', month_xsl 
 
 
-    html = generate_webpage doc.xml, month_xsl
+    html = generate_webpage self.to_xml, month_xsl
     {self.title.downcase[0..2] + '_calendar.html' => html, 
       self.css_layout => month_layout_css, self.css_style => month_css}
   end      
@@ -122,12 +124,12 @@ class PolyrexObjects::Week
 
     # add a css selector for the current day
     date = Time.now.strftime("%Y-%b-%d")
-    doc = Rexle.new self.to_xml
-    e = doc.root.element("records/day/summary[sdate='#{date}']")
 
-    e.add Rexle::Element.new('css_style').add_text('selected')
+    e = self.element("records/day/summary[sdate='#{date}']")
+    e.attributes[:class] = 'selected' if e
 
-    html = generate_webpage doc.xml, week_xsl
+
+    html = generate_webpage self.to_xml, week_xsl
     {'week' + self.no + '_planner.html' => html, 'week_layout.css' => week_layout_css, \
      'week.css' => week_css}
   end  
@@ -167,6 +169,7 @@ class PolyrexCalendar
          entry: 'entry[time_start, time_end, duration, title]'
     }
     @schema = %i(calendar month day entry).map{|x| h[x]}.join '/'
+    @visual_schema = h.values.join '/'
 
 
     if calendar_file then
@@ -223,10 +226,12 @@ class PolyrexCalendar
 
   def kitchen_planner()
 
-    #px = Polyrex.new(@schema, id_counter: @id)
-    #px.summary.year = @year
-    #(1..12).each {|n| px.add self.month(n, monday_week: true) }
     px = @polyrex
+
+    # add a css selector for the current day
+    date = DateTime.now.strftime("%Y-%b-%d")
+    e = px.element("records/month/records/day/summary[sdate='#{date}']")
+    e.attributes[:class] = 'selected' if e
 
     px.xslt = 'kplanner.xsl'
     px.css_layout = 'monthday_layout.css'
@@ -239,9 +244,17 @@ class PolyrexCalendar
 
   def year_planner()
 
-    px = Polyrex.new(@schema, id_counter: @id)
+    px = Polyrex.new(@visual_schema, id_counter: @id)
     px.summary.year = @year
+
     (1..12).each {|n| px.add self.month(n, monday_week: true) }
+
+    # add a css selector for the current day
+    date = DateTime.now.strftime("%Y-%b-%d")
+    e = px.element("records/month/records/week/records/day/" \
+                                              + "summary[sdate='#{date}']")
+    e.attributes[:class] = 'selected' if e
+
 
     px.xslt = 'calendar.xsl'
     px.css_layout = 'layout.css'

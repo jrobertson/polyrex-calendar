@@ -1,7 +1,7 @@
 body {background-color: transparent }
 
 #wrap {
-  background-color: #d93; 
+  background-color: transparent; 
   margin: 0;
   margin-bottom: 0.6em;
   overflow: hidden;
@@ -16,13 +16,13 @@ body {background-color: transparent }
   }
 
   #wrap>div:first-child {
-    background-color: #458;
+    background-color: transparent;
     float:left;
     width:400px;
   }
 
   #wrap>div:first-child>div {
-    background-color: #894;
+    background-color: transparent;
     float: left;
  
     padding: 0.4em 0.4em;
@@ -38,14 +38,14 @@ body {background-color: transparent }
 
 
   #wrap>div:nth-child(2), #wrap>div:last-child {
-    background-color: #444;
+    background-color: transparent;
     font-size: 0.8em;
     padding: 0.5em;
     margin: 0.3em;
 
   }
   #wrap>div:nth-child(2) {
-    background-color: #444;
+    background-color: transparent;
     float: left;
     width: 250px;
     page-break-after: always;
