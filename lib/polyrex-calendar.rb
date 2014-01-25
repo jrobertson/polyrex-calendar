@@ -26,11 +26,8 @@ module LIBRARY
 
   def fetch_file(filename)
 
-    #lib = File.dirname(__FILE__)
-    #File.read filename      
-    lib = 'http://rorbuilder.info/r/ruby/polyrex-calendar'
-    open(File.join(lib, filename), 
-      'UserAgent' => 'PolyrexCalendar'){|x| x.read }
+    lib = File.dirname(__FILE__)
+    File.read File.join(lib, filename )
   end
 
   def generate_webpage(xml, xsl)
