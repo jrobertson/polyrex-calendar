@@ -56,11 +56,19 @@
     </xsl:if>
     <div><xsl:value-of select="xday"/></div>
     <div><xsl:value-of select="substring(title,1,3)"/></div>
-
     <div>
-      <xsl:value-of select="bankholiday"/><xsl:text> </xsl:text>
-      <span><xsl:value-of select="event"/></span>
+
+      <ul>
+      <xsl:if test="not(event='')">
+        <li><strong><xsl:value-of select="event"/></strong></li>
+      </xsl:if>
+      <xsl:if test="../records/entry/summary/title and not(../records/entry/summary/title='')">
+      <li><xsl:value-of select="../records/entry/summary/title"/></li>
+      </xsl:if>
+      </ul>
+
     </div>
+    <div><xsl:value-of select="bankholiday"/></div>
   </xsl:element>
 </xsl:template>
 

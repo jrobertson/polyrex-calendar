@@ -61,23 +61,42 @@ body {
     font-size: 1.3em;
     margin: 0.2em 0.2em;
     padding: 0.4em 0.3em 0.3em 0.3em;
-    width: 2.4em;
+    width: 1.7em;
 
   }
   #wrap>ul>li>div:nth-child(3){
     background-color: transparent;
     color: #000;
     float: right;
+    font-size: 0.8em;
     font-size: 0.65em;
-    margin: 3.4em 0.0em 0.1em 0.2em;
-    padding: 0.1em 0.2em;
-
+    margin: 0 0.2em;
+    min-height: 2em;
+    padding: 0.2em;
+    text-align: right;
+    width: 16.6em;   
   }
+    #wrap>ul>li>div:nth-child(3)>ul{
+      background-color: transparent;
+      color: #000;
+      font-size: 1.0em;
+      margin: 0.1em;
+      padding: 0.1em;
+      text-align: left;
+    }
 
-  #wrap>ul>li>div:nth-child(3)>span{
+  #wrap>ul>li>div:nth-child(4){
     background-color: transparent;
-    font-weight: 700;
+    color: #000;
+    float: right;
+    font-size: 0.65em;
+    margin: 0.2em;
+    padding: 0.2em;
+    text-align: right;
+    width: 17.0em;
+
   }
+
   #wrap>ul {
     background-color: rgba(250,230,230, 0.5);
     list-style-type: none;
