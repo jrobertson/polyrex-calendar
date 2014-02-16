@@ -413,14 +413,48 @@ class PolyrexCalendar
       dt = DateTime.parse(event[:date])
       m, d = dt.month, dt.day
 
-      event_label = case daytype
+      case daytype
         when :event=
-          "%s at %s" % [event[:title], dt.strftime("%H:%M%p")]
+          if dynarex.fields.include?(:time) then
+
+            match = event[:time].match(/(\S+)\s*(?:to|-)\s*(\S+)/) 
+
+            if match then
+
+              start_time, end_time = match.captures
+              # add an event entry
+              title = [event[:title], dynarex.summary[:label], 
+                                event[:desc]].compact.join(': ')
+              record = {
+                title: title, 
+                time_start: Time.parse(start_time).strftime("%H:%M%p"), 
+                time_end: Time.parse(end_time).strftime("%H:%M%p")
+              }
+
+              @polyrex.records[m-1].day[d-1].create.entry record
+            else
+
+              dt = DateTime.parse(event[:date] + ' ' + event[:time])
+              # add the event
+              title = [event[:title], dynarex.summary[:label], 
+                                event[:desc]].compact.join(': ')
+              event_label = "%s at %s" % [title, dt.strftime("%H:%M%p")]
+
+              @polyrex.records[m-1].day[d-1].method(daytype).call event_label
+            end
+
+          else
+
+            event_label = "%s at %s" % [event[:title], dt.strftime("%H:%M%p")]
+            @polyrex.records[m-1].day[d-1].method(daytype).call event_label
+          end
+
         else
-          "%s" % event[:title]
+
+          event_label = "%s" % event[:title]
+          @polyrex.records[m-1].day[d-1].method(daytype).call event_label
       end
 
-      @polyrex.records[m-1].day[d-1].method(daytype).call event_label
     end
   end
 

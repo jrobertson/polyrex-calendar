@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = 'polyrex-calendar'
-  s.version = '0.3.9'
+  s.version = '0.3.10'
   s.summary = 'polyrex-calendar'
   s.authors = ['James Robertson']
   s.files = Dir['lib/**/*']
