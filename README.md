@@ -121,7 +121,23 @@ The calendar can generate various calendar formats including, monthly, weekly, y
 
 ![kitchen monthly planner screenshot](http://www.jamesrobertson.eu/images/2014/jan/23/kitchen-monthly-planner.png)
 
+## Applying a custom XSLT stylesheet for the yearly calendar
+
+    require 'polyrex-calendar'
+
+    Dir.chdir '/home/james/jamesrobertson.eu/calendar/'
+    cal = PolyrexCalendar.new 'polyrex.xml'
+
+    k = cal.year_planner
+    k.xslt = '/home/james/jamesrobertson.eu/calendar/public_calendar.xsl'
+    h = k.to_webpage
+
+In this example I removed the side events from the page as show below:
+
+![screenshot of the yearly calendar](http://www.jamesrobertson.eu/images/2014/jul/06/yearly-planner.png)
+
 ## Resources
 
 * [jrobertson/polyrex-calendar](https://github.com/jrobertson/polyrex-calendar)
+
 
