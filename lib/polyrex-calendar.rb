@@ -7,6 +7,7 @@ require 'date'
 require 'nokogiri'
 require 'chronic_duration'
 require 'chronic_cron'
+require 'rxfhelper'
 
 
 MONTH = DAY * 30
@@ -27,7 +28,8 @@ module LIBRARY
   def fetch_file(filename)
 
     lib = File.dirname(__FILE__)
-    File.read File.join(lib, filename )
+    File.read filename      
+
   end
 
   def generate_webpage(xml, xsl)
@@ -36,6 +38,10 @@ module LIBRARY
     doc = Nokogiri::XML(xml)
     xslt  = Nokogiri::XSLT(xsl)
     xslt.transform(doc).to_s   
+  end
+
+  def read(s)
+    RXFHelper.read(s).first
   end
 end 
 
@@ -50,7 +56,7 @@ class Polyrex
 
   def to_webpage()
 
-    year_xsl        = fetch_file self.xslt
+    year_xsl        = self.xslt ? read(self.xslt) : fetch_file(self.xslt)
     year_layout_css = fetch_file self.css_layout
     year_css        = fetch_file self.css_style
     File.open('self.xml','w'){|f| f.write (self.to_xml pretty: true)}
@@ -78,8 +84,6 @@ class PolyrexObjects::Month
     month_xsl        = fetch_file self.xslt
     month_layout_css = fetch_file self.css_layout
     month_css        = fetch_file self.css_style
-
-    #html = Rexslt.new(month_xsl, self.to_xml).to_xml
 
     # add a css selector for the current day
     date = Time.now.strftime("%Y-%b-%d")
@@ -116,8 +120,6 @@ class PolyrexObjects::Week
 
     File.write 'self.xml', self.to_xml(pretty: true)
     File.write 'week.xsl', week_xsl
-    #html = Rexslt.new(week_xsl, self.to_xml).to_xml
-    #html = xsltproc 'week_calendar.xsl', self.to_xml
 
     # add a css selector for the current day
     date = Time.now.strftime("%Y-%b-%d")
@@ -252,8 +254,6 @@ class PolyrexCalendar
                                               + "summary[sdate='#{date}']")
     e.attributes[:class] = 'selected' if e
 
-
-    px.xslt = 'calendar.xsl'
     px.css_layout = 'layout.css'
     px.css_style = 'year.css'
     px.filename = px.summary.year.to_s + '-planner.html'
@@ -603,5 +603,4 @@ class PolyrexCalendar
     a = b.+([nil] * max_slots).take(max_slots).reverse
   end
   
-
 end
