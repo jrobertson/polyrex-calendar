@@ -2,7 +2,7 @@
 
 # file: polyrex-calendar.rb
 
-require 'px-calendarbase'
+require 'polyrex_calendarbase'
 
 
 class PolyrexObjects
