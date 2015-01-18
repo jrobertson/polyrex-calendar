@@ -5,6 +5,16 @@
 require 'polyrex_calendarbase'
 
 
+module LIBRARY
+
+  def fetch_file(filename)
+
+    lib = File.dirname(__FILE__)
+    File.read filename      
+
+  end
+end
+
 class PolyrexObjects
   
   class Month

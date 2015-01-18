@@ -12,6 +12,25 @@ class PolyrexObjects
     def wk(n)
       self.records[n-1]        
     end      
+    
+    def to_webpage()
+      
+      month_xsl = fetch_file self.xslt
+      month_layout_css = fetch_file self.css_layout
+      month_css = fetch_file self.css_style
+      
+      # add a css selector for the current day
+      date = Time.now.strftime("%Y-%b-%d")
+      e = self.element("records/week/records/day/summary[sdate='#{date}']")
+      e.attributes[:class] = 'selected' if e
+      
+      File.write 'self.xml', self.to_xml(pretty: true)
+      File.write 'month.xsl', month_xsl
+      
+      html = generate_webpage self.to_xml, month_xsl
+      {self.title.downcase[0..2] + '_calendar.html' => html,
+          self.css_layout => month_layout_css, self.css_style => month_css}
+    end    
   end
 
   class Week
@@ -140,7 +159,7 @@ class PolyrexCalendar < PolyrexCalendarBase
           when 0 then  a
 
           # add a few placeholders before the 1st day          
-          else Array.new(6 - wday) + a
+          else Array.new(8 - wday) + a
         end
 
         r

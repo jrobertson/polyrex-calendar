@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = 'polyrex-calendar'
-  s.version = '0.5.2'
+  s.version = '0.5.3'
   s.summary = 'Generates an HTML calendar from a Polyrex document'
   s.authors = ['James Robertson']
   s.files = Dir['lib/**/*']
