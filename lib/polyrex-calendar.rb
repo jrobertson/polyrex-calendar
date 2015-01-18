@@ -4,13 +4,12 @@
 
 require 'polyrex_calendarbase'
 
-
 module LIBRARY
 
   def fetch_file(filename)
 
     lib = File.dirname(__FILE__)
-    File.read filename      
+    File.read File.join(lib,filename)
 
   end
 end
