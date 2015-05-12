@@ -126,7 +126,7 @@ class PolyrexCalendar < PolyrexCalendarBase
   end
 
   def month(m, monday_week: false)
-
+    
     if monday_week == true
 
       pxmonth = make_month(m) do |a, wday|
@@ -159,6 +159,7 @@ class PolyrexCalendar < PolyrexCalendarBase
 
       pxmonth = make_month(m) do |a, wday|
 
+
         # Sunday start
         # wdays: 1 = Monday, 0 = Sunday
 
@@ -168,7 +169,7 @@ class PolyrexCalendar < PolyrexCalendarBase
           when 0 then  a
 
           # add a few placeholders before the 1st day          
-          else Array.new(8 - wday) + a
+          else Array.new(wday) + a
         end
 
         r
@@ -206,8 +207,9 @@ class PolyrexCalendar < PolyrexCalendarBase
 
 
   def make_month(m)
-
+        
     cal_month = @calendar.month(m)
+    
     days_in_month = cal_month.records
     pxmonth = cal_month.clone
     pxmonth.records.each(&:delete)
@@ -261,5 +263,5 @@ class PolyrexCalendar < PolyrexCalendarBase
     (10...20).include?(val) ? \
       'th' : %w{ th st nd rd th th th th th th }[val % 10] 
   end
-
+  
 end
