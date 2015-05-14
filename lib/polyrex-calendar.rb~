@@ -263,4 +263,5 @@ class PolyrexCalendar < PolyrexCalendarBase
     (10...20).include?(val) ? \
       'th' : %w{ th st nd rd th th th th th th }[val % 10] 
   end
+  
 end

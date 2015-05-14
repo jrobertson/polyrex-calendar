@@ -27,16 +27,25 @@ class PolyrexObjects
       month_xsl = fetch_file self.xslt
       month_layout_css = fetch_file self.css_layout
       month_css = fetch_file self.css_style
+            
+      File.write 'month.xsl', month_xsl
+      doc = self.to_doc
+      
+      xslt_filename = File.basename self.xslt
+      
+      doc.instructions << [
+        'xml-stylesheet',
+          "title='XSL_formatting' type='text/xsl' href='month.xsl'"]
       
       # add a css selector for the current day
       date = Time.now.strftime("%Y-%b-%d")
-      e = self.element("records/week/records/day/summary[sdate='#{date}']")
-      e.attributes[:class] = 'selected' if e
+      e = doc.root.element("records/week/records/day/summary[sdate='#{date}']")
+      e.attributes[:css_style] = 'today' if e      
       
-      File.write 'self.xml', self.to_xml(pretty: true)
-      File.write 'month.xsl', month_xsl
       
-      html = generate_webpage self.to_xml, month_xsl
+      File.write 'month.xml', doc.xml(pretty: true)
+      
+      html = generate_webpage doc.xml, month_xsl
       {self.title.downcase[0..2] + '_calendar.html' => html,
           self.css_layout => month_layout_css, self.css_style => month_css}
     end    
@@ -176,7 +185,7 @@ class PolyrexCalendar < PolyrexCalendarBase
 
       end
 
-      pxmonth.xslt = 'month_calendar.xsl'
+      pxmonth.xslt = 'lmonth.xsl'
       pxmonth.css_layout = 'month_layout.css'
       pxmonth.css_style = 'month.css'
       pxmonth
@@ -263,5 +272,5 @@ class PolyrexCalendar < PolyrexCalendarBase
     (10...20).include?(val) ? \
       'th' : %w{ th st nd rd th th th th th th }[val % 10] 
   end
-  
+
 end
