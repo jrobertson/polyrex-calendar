@@ -29,9 +29,7 @@ class PolyrexObjects
           "title='XSL_formatting' type='text/xsl' href='lmonth.xsl'"]
       
       # add a css selector for the current day
-      date = Time.now.strftime("%Y-%b-%d")
-      e = doc.root.element("records/week/records/day/summary[sdate='#{date}']")
-      e.attributes[:css_style] = 'today' if e      
+      highlight_today()     
       
       
       File.write 'month.xml', doc.xml(pretty: true)
@@ -56,11 +54,7 @@ class PolyrexObjects
       #html = xsltproc 'week_calendar.xsl', self.to_xml
 
       # add a css selector for the current day
-      date = Time.now.strftime("%Y-%b-%d")
-
-      e = self.element("records/day/summary[sdate='#{date}']")
-      e.attributes[:class] = 'selected' if e
-      highlight_today(self)
+      highlight_today()
 
 
       html = generate_webpage self.to_xml, week_xsl
