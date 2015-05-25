@@ -4,20 +4,11 @@
 
 require 'polyrex_calendarbase'
 
-module LIBRARY
-
-  def fetch_file(filename)
-
-    lib = File.dirname(__FILE__)
-    File.read File.join(lib,filename)
-
-  end
-end
 
 class PolyrexObjects
   
   class Month
-    
+        
     def wk(n)
       self.records[n-1]        
     end      
@@ -28,14 +19,14 @@ class PolyrexObjects
       month_layout_css = fetch_file self.css_layout
       month_css = fetch_file self.css_style
             
-      File.write 'month.xsl', month_xsl
+      File.write 'lmonth.xsl', month_xsl
       doc = self.to_doc
       
       xslt_filename = File.basename self.xslt
       
       doc.instructions << [
         'xml-stylesheet',
-          "title='XSL_formatting' type='text/xsl' href='month.xsl'"]
+          "title='XSL_formatting' type='text/xsl' href='lmonth.xsl'"]
       
       # add a css selector for the current day
       date = Time.now.strftime("%Y-%b-%d")
@@ -69,6 +60,7 @@ class PolyrexObjects
 
       e = self.element("records/day/summary[sdate='#{date}']")
       e.attributes[:class] = 'selected' if e
+      highlight_today(self)
 
 
       html = generate_webpage self.to_xml, week_xsl
