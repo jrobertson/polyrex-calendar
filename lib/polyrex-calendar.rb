@@ -7,12 +7,18 @@ require 'polyrex_calendarbase'
 
 module LIBRARY
 
-  def fetch_file(filename)
+  def fetch_filepath(filename)
 
     lib = File.dirname(__FILE__)
-    File.read File.join(lib,'..','stylesheet',filename)
+    File.join(lib, filename)
+  end
+  
+  def fetch_file(filename)
 
-  end  
+    filepath = fetch_filepath filename
+    read filepath
+  end
+  
 
   def generate_webpage(xml, xsl)
     
@@ -25,7 +31,7 @@ module LIBRARY
   def read(s)
     RXFHelper.read(s).first
   end
-end 
+end
 
 class PolyrexObjects
   
@@ -123,7 +129,7 @@ class PolyrexCalendar < PolyrexCalendarBase
 
   def year_planner()
 
-    px = Polyrex.new(@visual_schema, id_counter: @id)
+    px = Calendar.new(@visual_schema, id_counter: @id)
     px.summary.year = @year
 
     (1..12).each {|n| px.add self.month(n, monday_week: true) }
@@ -134,6 +140,7 @@ class PolyrexCalendar < PolyrexCalendarBase
                                               + "summary[sdate='#{date}']")
     e.attributes[:class] = 'selected' if e
 
+    px.xslt = self.fetch_filepath('calendar.xsl')
     px.css_layout = 'layout.css'
     px.css_style = 'year.css'
     px.filename = px.summary.year.to_s + '-planner.html'
