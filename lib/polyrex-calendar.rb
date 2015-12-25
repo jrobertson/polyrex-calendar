@@ -5,6 +5,28 @@
 require 'polyrex_calendarbase'
 
 
+module LIBRARY
+
+  def fetch_file(filename)
+
+    lib = File.dirname(__FILE__)
+    File.read File.join(lib,'..','stylesheet',filename)
+
+  end  
+
+  def generate_webpage(xml, xsl)
+    
+    # transform the xml to html
+    doc = Nokogiri::XML(xml)
+    xslt  = Nokogiri::XSLT(xsl)
+    xslt.transform(doc).to_s   
+  end
+
+  def read(s)
+    RXFHelper.read(s).first
+  end
+end 
+
 class PolyrexObjects
   
   class Month
