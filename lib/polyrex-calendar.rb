@@ -96,9 +96,9 @@ end
 
 class PolyrexCalendar < PolyrexCalendarBase
   
-  def initialize(calendar_file=nil, options={})
+  def initialize(calendar_file=nil, year: Date.today.year.to_s)
 
-    super(calendar_file, options)
+    super(calendar_file, year: year)
 
     @xsl = fetch_file 'calendar.xsl'
     @css = fetch_file 'layout.css'
