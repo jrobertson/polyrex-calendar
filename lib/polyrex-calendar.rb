@@ -10,7 +10,7 @@ module LIBRARY
   def fetch_filepath(filename)
 
     lib = File.dirname(__FILE__)
-    File.join(lib, filename)
+    File.join(lib,'..','stylesheet',filename)
   end
   
   def fetch_file(filename)
