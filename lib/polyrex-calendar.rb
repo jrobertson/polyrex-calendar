@@ -3,9 +3,10 @@
 # file: polyrex-calendar.rb
 
 require 'polyrex_calendarbase'
+require 'weeklyplanner_template'
 
 
-module LIBRARY
+module LIBRARY2
 
   def fetch_filepath(filename)
 
@@ -32,6 +33,7 @@ module LIBRARY
     RXFHelper.read(s).first
   end
 end
+
 
 class PolyrexObjects
   
@@ -72,22 +74,23 @@ class PolyrexObjects
     
     def to_webpage()
 
-      week_xsl        = fetch_file 'week_calendar.xsl'
-      week_layout_css = fetch_file 'week_layout.css'
-      week_css        = fetch_file 'week.css'
+      #week_xsl        = fetch_file 'week_calendar.xsl'
+      #week_layout_css = fetch_file 'week_layout.css'
+      #week_css        = fetch_file 'week.css'
 
-      File.write 'self.xml', self.to_xml(pretty: true)
-      File.write 'week.xsl', week_xsl
+      #File.write 'self.xml', self.to_xml(pretty: true)
+      #File.write 'week.xsl', week_xsl
       #html = Rexslt.new(week_xsl, self.to_xml).to_xml
       #html = xsltproc 'week_calendar.xsl', self.to_xml
 
       # add a css selector for the current day
-      highlight_today()
+      #highlight_today()
 
 
-      html = generate_webpage self.to_xml, week_xsl
-      {'week' + self.no + '_planner.html' => html, 'week_layout.css' => week_layout_css, \
-      'week.css' => week_css}
+      #html = generate_webpage self.to_xml, week_xsl
+      #{'week' + self.no + '_planner.html' => html, 'week_layout.css' => week_layout_css, \
+      #'week.css' => week_css}
+      WeeklyplannerTemplate.new(self.to_xml, template: 'default').to_h
     end  
   end
 
@@ -132,7 +135,9 @@ class PolyrexCalendar < PolyrexCalendarBase
     px = Calendar.new(@visual_schema, id_counter: @id)
     px.summary.year = @year
 
-    (1..12).each {|n| px.add self.month(n, monday_week: true) }
+    (1..12).each do |n| 
+      px.add self.month(n, monday_week: true) 
+    end
 
     # add a css selector for the current day
     date = DateTime.now.strftime("%Y-%b-%d")
@@ -150,7 +155,7 @@ class PolyrexCalendar < PolyrexCalendarBase
   end
 
   def month(m, monday_week: false)
-    
+
     if monday_week == true
 
       pxmonth = make_month(m) do |a, wday|
