@@ -1,3 +1,31 @@
+# Generating a 12 page monthly calendar using the Polyrex-calendar gem
+
+
+    require 'polyrex-calendar'
+
+
+    Dir.chdir '/tmp/cal/'
+    PolyrexCalendar.new().save :kitchen_planner
+    #=> "saved /tmp/cal/2019-kitchen-planner.html" 
+
+The above script generates a monthly calendar for 2019 suitable for viewing from an HTML page or from a hard copy (printing it).
+
+Files generated within the */tmp/cal* file directory:
+
+* 2019-kitchen-planner.html
+* kplanner.xsl
+* monthday.css
+* monthday_layout.css
+* monthday_print.css
+* self.xml
+
+## Output
+
+![Screenshot of kitchen calendar](http://a0.jamesrobertson.eu/r/images/2018/dec/28/kitchencalendar2019.png)
+
+----------------------------------------
+
+
 # Adding entries to a Polyrex Calendar
 
 There are various ways to add an entry to a Polyrex Calendar, either from a Dynarex, or Polyrex document, or from direct access to the day object.
