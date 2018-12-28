@@ -1,10 +1,10 @@
 Gem::Specification.new do |s|
   s.name = 'polyrex-calendar'
-  s.version = '0.7.1'
+  s.version = '0.7.3'
   s.summary = 'Generates an HTML calendar from a Polyrex document'
   s.authors = ['James Robertson']
-  s.files = Dir['lib/polyrex-calendar.rb','stylesheet/**/*']
-  s.add_runtime_dependency('polyrex_calendarbase', '~> 0.3', '>=0.3.0')
+  s.files = Dir['lib/polyrex-calendar.rb','stylesheet/*.xsl','stylesheet/*.css']
+  s.add_runtime_dependency('polyrex_calendarbase', '~> 0.3', '>=0.3.1')
   s.add_runtime_dependency('weeklyplanner_template', '~> 0.1', '>=0.1.4') 
   s.signing_key = '../privatekeys/polyrex-calendar.pem'
   s.cert_chain  = ['gem-public_cert.pem']

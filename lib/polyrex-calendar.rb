@@ -6,6 +6,18 @@ require 'polyrex_calendarbase'
 require 'weeklyplanner_template'
 
 
+module LIBRARY2
+
+  def fetch_filepath(filename)
+
+    lib = File.dirname(__FILE__)    
+    File.join(lib,'..','stylesheet',filename)
+
+  end  
+  
+end
+
+
 class PolyrexObjects
   
   class Month
@@ -19,6 +31,7 @@ class PolyrexObjects
       month_xsl = fetch_file self.xslt
       month_layout_css = fetch_file self.css_layout
       month_css = fetch_file self.css_style
+      month_print_css = fetch_file self.css_print
             
       File.write 'lmonth.xsl', month_xsl
       doc = self.to_doc
@@ -36,8 +49,12 @@ class PolyrexObjects
       File.write 'month.xml', doc.xml(pretty: true)
       
       html = generate_webpage doc.xml, month_xsl
-      {self.title.downcase[0..2] + '_calendar.html' => html,
-          self.css_layout => month_layout_css, self.css_style => month_css}
+      
+      {
+        self.title.downcase[0..2] + '_calendar.html' => html,
+        self.css_layout => month_layout_css, self.css_style => month_css, 
+        self.css_print => month_print_css
+      }
     end    
   end
 
@@ -54,7 +71,7 @@ class PolyrexObjects
 end
 
 class PolyrexCalendar < PolyrexCalendarBase
-
+  using ColouredText
   
   def initialize(calendar_file=nil, year: nil, debug: false)
     
@@ -66,7 +83,7 @@ class PolyrexCalendar < PolyrexCalendarBase
       year
     end
 
-    puts ('year: ' + year.inspect).debug if @debug
+    puts ('year: ' + year.inspect).debug if debug
     super(calendar_file, year: year)
 
     @xsl = fetch_file 'calendar.xsl'
@@ -90,6 +107,7 @@ class PolyrexCalendar < PolyrexCalendarBase
     px.xslt = 'kplanner.xsl'
     px.css_layout = 'monthday_layout.css'
     px.css_style = 'monthday.css'
+    px.css_print = 'monthday_print.css'
     px.filename = @year + '-kitchen-planner.html'
 
     px
