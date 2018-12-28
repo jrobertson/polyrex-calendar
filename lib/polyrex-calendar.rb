@@ -6,35 +6,6 @@ require 'polyrex_calendarbase'
 require 'weeklyplanner_template'
 
 
-module LIBRARY2
-
-  def fetch_filepath(filename)
-
-    lib = File.dirname(__FILE__)
-    File.join(lib,'..','stylesheet',filename)
-  end
-  
-  def fetch_file(filename)
-
-    filepath = fetch_filepath filename
-    read filepath
-  end
-  
-
-  def generate_webpage(xml, xsl)
-    
-    # transform the xml to html
-    doc = Nokogiri::XML(xml)
-    xslt  = Nokogiri::XSLT(xsl)
-    xslt.transform(doc).to_s   
-  end
-
-  def read(s)
-    RXFHelper.read(s).first
-  end
-end
-
-
 class PolyrexObjects
   
   class Month
@@ -74,23 +45,8 @@ class PolyrexObjects
     
     def to_webpage()
 
-      #week_xsl        = fetch_file 'week_calendar.xsl'
-      #week_layout_css = fetch_file 'week_layout.css'
-      #week_css        = fetch_file 'week.css'
-
-      #File.write 'self.xml', self.to_xml(pretty: true)
-      #File.write 'week.xsl', week_xsl
-      #html = Rexslt.new(week_xsl, self.to_xml).to_xml
-      #html = xsltproc 'week_calendar.xsl', self.to_xml
-
-      # add a css selector for the current day
-      #highlight_today()
-
-
-      #html = generate_webpage self.to_xml, week_xsl
-      #{'week' + self.no + '_planner.html' => html, 'week_layout.css' => week_layout_css, \
-      #'week.css' => week_css}
       WeeklyplannerTemplate.new(self.to_xml, template: 'default').to_h
+      
     end  
   end
 
@@ -98,9 +54,19 @@ class PolyrexObjects
 end
 
 class PolyrexCalendar < PolyrexCalendarBase
-  
-  def initialize(calendar_file=nil, year: Date.today.year.to_s)
 
+  
+  def initialize(calendar_file=nil, year: nil, debug: false)
+    
+    @debug = debug
+    
+    year = if year.nil? then
+      (Date.today.month > 6 ? Date.today.year + 1 : Date.today.year).to_s
+    else
+      year
+    end
+
+    puts ('year: ' + year.inspect).debug if @debug
     super(calendar_file, year: year)
 
     @xsl = fetch_file 'calendar.xsl'
@@ -210,6 +176,18 @@ class PolyrexCalendar < PolyrexCalendarBase
       pxmonth.css_style = 'month.css'
       pxmonth
     end
+
+  end
+  
+  def save(planner_name, xslt: nil)
+    
+    planner = self.kitchen_planner
+    return unless planner
+
+    planner.xslt = xslt if xslt
+    h = planner.to_webpage
+    h.each_pair {|filename, value| FileX.write filename, value }
+    "saved %s" % File.join(Dir.pwd, h.keys.first.to_s)
 
   end
     
